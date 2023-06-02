@@ -7,27 +7,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="style.css">
 
     <title>現在時刻表示</title>
 </head>
 
 <body class="black-bg">
-    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
-        <svg id="clock" class="clock" viewBox="0 0 100 100">
-            <circle class="clock-face" cx="50" cy="50" r="48"/>
-            <line class="hour-hand" x1="50" y1="50" x2="50" y2="35"/>
-            <line class="minute-hand" x1="50" y1="50" x2="50" y2="25"/>
-            <line class="second-hand" x1="50" y1="50" x2="50" y2="15"/>
-        </svg>        
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <svg id="clock" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45"/>
+            <g transform="translate(50, 50)">
+                <line class="hour-hand" x1="0" y1="0" x2="0" y2="-20" transform-origin="center"/>
+                <line class="minute-hand" x1="0" y1="0" x2="0" y2="-30" transform-origin="center"/>
+                <line class="second-hand" x1="0" y1="10" x2="0" y2="-35" transform-origin="center"/>
+            </g>
+        </svg>
     </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <!-- Custom JS -->
     <script src="index.js"></script>

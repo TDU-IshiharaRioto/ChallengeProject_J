@@ -1,25 +1,24 @@
 body.black-bg {
-    background-color: #000000;
+    background-color: #ffffff;
 }
 
-svg.clock {
+#clock {
     width: 60%;
     height: auto;
 }
 
-.clock-face {
+#clock circle {
     fill: none;
-    stroke: #ffffff;
-    stroke-width: 4;
+    stroke: rgb(0, 0, 0);
+    stroke-width: 2;
 }
 
 .hour-hand,
 .minute-hand,
 .second-hand {
-    stroke: #ffffff;
+    stroke: rgb(0, 0, 0);
+    stroke-width: 2;
     stroke-linecap: round;
-    transform-origin: 50% 50%;
-    stroke-width: 1.5;
 }
 
 .hour-hand {
