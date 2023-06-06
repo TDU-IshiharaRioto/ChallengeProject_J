@@ -1,7 +1,13 @@
 body.black-bg {
     background-color: #000000;
+    font-family: 'notosansjapanese', cursive;
 }
 
 h1.white-text {
     color: #ffffff;
+}
+
+li.list-group-item{
+    color: #ffffff;
+    background-color: #000000;
 }
