@@ -1,11 +1,11 @@
-import Function
 import time
 import sys
-import Exception.TimeServerNotFoundException as TimeServerNotFoundException
+from API.Exception import TimeServerNotFoundException as TimeServerNotFoundException
 from datetime import timedelta
+from API import NTP
 
 try:
-    startTime = Function.get_ntp_time_datetime("ntp.nict.jp")
+    startTime = NTP.get_ntp_time_datetime("ntp.nict.jp")
 except TimeServerNotFoundException as e:
     print(e)
     sys.exit()
