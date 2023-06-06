@@ -1,4 +1,8 @@
-# 関数一覧
+##################################################
+# 複数の関数をまとめたクラスです。
+# auther 石原遼大
+##################################################
+import json
 import ntplib
 import requests
 import sys
@@ -29,9 +33,20 @@ def get_ntp_time_datetime(server):
     nowtime = get_ntp_time(server)
     return datetime.strptime(nowtime, "%a %b %d %H:%M:%S %Y")
     
-# 天気を取得する
+# 天気を取得します
+# 引数は、APIキーと都市名です
+# 戻り値は、Json形式で返します
+# 例外として、requests.exceptions.RequestExceptionとjson.decoder.JSONDecodeErrorをraiseする可能性があります
 def get_weather(api_key, city):
     base_url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
-    response = requests.get(base_url)
-    data = response.json()
+    try:
+        response = requests.get(base_url)
+    except requests.exceptions.RequestException as e:
+        raise e
+    
+    try:
+        data = response.json()
+    except json.decoder.JSONDecodeError as e:
+        raise e
+    
     return data
