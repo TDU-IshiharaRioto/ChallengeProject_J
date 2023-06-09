@@ -1,5 +1,6 @@
 window.onload = function() {
     const timeElement = document.getElementById('time');
+    var yobi= new Array("日","月","火","水","木","金","土");
 
     function updateTime() {
         const now = new Date();
@@ -9,7 +10,9 @@ window.onload = function() {
         const hours = now.getHours().toString().padStart(2, '0');
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const seconds = now.getSeconds().toString().padStart(2, '0');
-        timeElement.textContent = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+
+        const week = now.getDay();
+        timeElement.textContent = `  ${month}/${day} (${yobi[week]})  ${hours}:${minutes}:${seconds}`;
     }
 
     setInterval(updateTime, 1000);
