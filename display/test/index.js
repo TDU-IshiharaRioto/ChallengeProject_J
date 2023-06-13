@@ -1,6 +1,7 @@
 window.onload = function() {
     const timeElement = document.getElementById('time');
-    var yobi= new Array("日","月","火","水","木","金","土");
+    const yobi= new Array("日","月","火","水","木","金","土");
+    const json = `{ "date": "2023-6-13", "name": "AAA", "age": 20 }`;
 
     function updateTime() {
         const now = new Date();
