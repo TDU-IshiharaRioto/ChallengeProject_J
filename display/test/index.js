@@ -1,8 +1,11 @@
 window.onload = function() {
     const timeElement = document.getElementById('time');
+    const weatherElement = document.getElementById('weather');
     const yobi= new Array("日","月","火","水","木","金","土");
     const json = `{ "date": "2023-6-13", "name": "AAA", "age": 20 }`;
 
+    weatherElement.textContent = '晴れ';
+    
     function updateTime() {
         const now = new Date();
         const year = now.getFullYear().toString().padStart(4, '0');
