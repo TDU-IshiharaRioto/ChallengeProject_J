@@ -1,42 +1,24 @@
-def get_weather_today():
+def get_weather_forecast(area = 130000):
     import requests
-    import html
-
-    url = "https://www.jma.go.jp/bosai/forecast/data/overview_forecast/130000.json"
+    # あとで引数で地域を指定できるようにする
+    url = 'https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json'
     response = requests.get(url)
+    
+    if(response.status_code != 200):
+        print('error')
+        return
+    
     data = response.json()
-    
-    publishing_office = data["publishingOffice"]
-    report_datetime = data["reportDatetime"]
-    target_area = data["targetArea"]
-    headline_text = data["headlineText"]
-    text = data["text"]
-    
-    print("データ配信元:", publishing_office)
-    print("報告日時:", report_datetime)
-    print("対象の地域:", target_area)
-    print("ヘッドライン:", headline_text)
-    print("詳細な概要情報:", html.unescape(text))
+    # print(data)
 
-def get_weather_forecast():
-    import requests
-    import html
+    return data
 
-    url = "https://www.jma.go.jp/bosai/forecast/data/forecas/130000.json"
-    response = requests.get(url)
-    data = response.json()
-    
-    publishing_office = data["publishingOffice"]
-    report_datetime = data["reportDatetime"]
-    target_area = data["areas"]
-    weathers = data["weathers"]
-    
-    print("発表者:", publishing_office)
-    print("報告日時:", report_datetime)
-    print("対象の地域:", target_area)
-    print("今日の天気:", weathers)
-    # print("明日の天気:", html.unescape(text))
-    # print("明後日の天気:", html.unescape(text)
 
-# get_weather_today()
-get_weather_forecast()
+if __name__ == '__main__':
+    # { "date": "2023-6-13","hour":"14", "weather": "晴れ", "max-temp": 25,"min-temp": 18 }
+    # この形式でデータをjsonファイルに出力する
+    import json
+    data = get_weather_forecast()
+    with open(file='weather.json', mode='w', encoding='utf_8') as f:
+        json.dump(obj=data, fp=f, indent=4, ensure_ascii=False)
+    
