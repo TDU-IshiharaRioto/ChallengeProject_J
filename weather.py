@@ -23,6 +23,7 @@ def get_weather_forecast(area = 140000):
 
 # データの正規化
 def normalize_data(data):
+    import datetime
     # { "date": "2023-6-13", "weather": "晴れ", "max-temp": 25,"min-temp": 18 }
     # の形に書き換える
 
@@ -38,6 +39,7 @@ def normalize_data(data):
     # print(date + ' ' + weather + ' ' + str(max_temp) + ' ' + str(min_temp))
 
     ret.append({
+        'now': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'date': date,
         'weather': weather,
         'max-temp': max_temp,
