@@ -10,7 +10,7 @@ window.onload = function() {
         const jsonObj = JSON.parse(req.responseText);
 
         for (let item of jsonObj) {
-            console.log("date: " + item.date + " weather: " + item.weather + " max-temp: " + item.max-temp + " min-temp: " + item.min-temp);
+            console.log("date: " + item.date + " weather: " + item.weather + " max-temp: " + item.maxtemp + " mintemp: " + item.mintemp);
         }
         }
     };
