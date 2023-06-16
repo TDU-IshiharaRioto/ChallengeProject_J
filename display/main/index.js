@@ -7,6 +7,7 @@ window.onload = function() {
 
     weatherElement.textContent = `[${parsed.weather}]  ${parsed.maxtemp}/${parsed.mintemp}℃`;
     
+    /*
     var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
     req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
         if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
@@ -15,6 +16,19 @@ window.onload = function() {
     };
     req.open("GET", "http://127.0.0.1/ChallengeProject_J/weather.json", false); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(null);					    // 実際にサーバーへリクエストを送信
+*/
+
+    let new_element1 = document.createElement('li');
+    new_element1.classList.add("list-group-item");
+    new_element1.textContent = ' 遅延';
+
+    let new_element2 = document.createElement('li');
+    new_element2.classList.add("list-group-item");
+    new_element2.textContent = ' 遅延2';
+
+    document.getElementById("traffic").appendChild(new_element1);
+    document.getElementById("traffic").appendChild(new_element2);
+
     
     function updateTime() {
         const now = new Date();
