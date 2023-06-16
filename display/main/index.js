@@ -1,5 +1,4 @@
 window.onload = function() {
-    const data = require('./data.json');
     const timeElement = document.getElementById('time');
     const weatherElement = document.getElementById('weather');
     const yobi= new Array("日","月","火","水","木","金","土");
@@ -7,10 +6,15 @@ window.onload = function() {
     const parsed = JSON.parse(json);
 
     weatherElement.textContent = `[${parsed.weather}]  ${parsed.maxtemp}/${parsed.mintemp}℃`;
-    var url = '127.0.0.1/ChallengeProject_J/weather.json';
-    $.getJSON(url, function(data){
-    console.log('data : ', data);
-    });
+    
+    var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
+    req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+        if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+        alert(req.responseText);		          // 取得した JSON ファイルの中身を表示
+        }
+    };
+    req.open("GET", "http://127.0.0.1/ChallengeProject_J/weather.json", false); // HTTPメソッドとアクセスするサーバーの　URL　を指定
+    req.send(null);					    // 実際にサーバーへリクエストを送信
     
     function updateTime() {
         const now = new Date();
