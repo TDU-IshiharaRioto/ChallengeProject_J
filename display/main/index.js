@@ -6,11 +6,11 @@ window.onload = function() {
     var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
     req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
         if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
-        alert(req.responseText);		          // 取得した JSON ファイルの中身を表示
+        //alert(req.responseText);		          // 取得した JSON ファイルの中身を表示
         const jsonObj = JSON.parse(req.responseText);
 
         for (let item of jsonObj) {
-            console.log("id: " + item.id + " title: " + item.title + " completed: " + item.completed);
+            console.log("date: " + item.date + " weather: " + item.weather + " max-temp: " + item.max-temp + " min-temp: " + item.min-temp);
         }
         }
     };
