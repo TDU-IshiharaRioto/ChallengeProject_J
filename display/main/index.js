@@ -1,4 +1,5 @@
 window.onload = function() {
+    const data = require('./data.json');
     const timeElement = document.getElementById('time');
     const weatherElement = document.getElementById('weather');
     const yobi= new Array("日","月","火","水","木","金","土");
@@ -6,6 +7,10 @@ window.onload = function() {
     const parsed = JSON.parse(json);
 
     weatherElement.textContent = `[${parsed.weather}]  ${parsed.maxtemp}/${parsed.mintemp}℃`;
+    var url = '127.0.0.1/ChallengeProject_J/weather.json';
+    $.getJSON(url, function(data){
+    console.log('data : ', data);
+    });
     
     function updateTime() {
         const now = new Date();
