@@ -23,26 +23,26 @@ def get_weather_forecast(area = 140000):
 
 # データの正規化
 def normalize_data(data):
-    # { "date": "2023-6-13", "weather": "晴れ", "max-temp": 25,"min-temp": 18 }
+    # { "date": "2023-6-13","hour":"14", "weather": "晴れ", "max-temp": 25,"min-temp": 18 }
     # の形に書き換える
 
     ret = []
     
-    time = data[0]['reportDatetime']
-    # print(time)
-    date = time[0:10]
-    weather = data[0]['timeSeries'][0]['areas'][0]['weathers'][0]
-    max_temp = data[1]['tempAverage']['areas'][0]['min']
-    min_temp = data[1]['tempAverage']['areas'][0]['max']
-
-    # print(date + ' ' + weather + ' ' + str(max_temp) + ' ' + str(min_temp))
+    date = data['reportDatetime']
+    print(date)
+    # weather = data['timeSeries'][0]['areas'][0]['weathers'][i]
+    # max_temp = data['timeSeries'][0]['areas'][0]['temps'][i]
+    # min_temp = data['timeSeries'][0]['areas'][0]['tempsMin'][i]
 
     ret.append({
-        'date': date,
+        'date': date[0:10],
+        'hour': date[11:13],
         'weather': weather,
         'max-temp': max_temp,
         'min-temp': min_temp
     })
+
+    print(ret)
     return ret
 
 if __name__ == '__main__':
@@ -50,9 +50,8 @@ if __name__ == '__main__':
     import json
     code = get_area_code()
     data = get_weather_forecast()
-    # print(data)
     output = normalize_data(data)
 
     with open(file='weather.json', mode='w', encoding='utf_8') as f:
-        json.dump(obj=output, fp=f, indent=4, ensure_ascii=False)
+        json.dump(obj=data, fp=f, indent=4, ensure_ascii=False)
     
