@@ -7,16 +7,18 @@ window.onload = function() {
 
     weatherElement.textContent = `[${parsed.weather}]  ${parsed.maxtemp}/${parsed.mintemp}℃`;
     
-    /*
+    
     var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
     req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
         if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
-        alert(req.responseText);		          // 取得した JSON ファイルの中身を表示
+        //alert(req.responseText);		          // 取得した JSON ファイルの中身を表示
+        const parsed = JSON.parse(req.responseText);
+        document.getElementById('weather_info').textContent = parsed.weather;
         }
     };
     req.open("GET", "http://127.0.0.1/ChallengeProject_J/weather.json", false); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(null);					    // 実際にサーバーへリクエストを送信
-*/
+
 
     let new_element1 = document.createElement('li');
     new_element1.classList.add("list-group-item");
