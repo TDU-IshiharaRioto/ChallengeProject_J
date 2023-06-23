@@ -1,14 +1,32 @@
 # エリアコードの取得
 def get_area_code():
-    # https://anko.education/webapi/jma
-    # この地域コード対応表を見ながら作成
+    import requests
+    url = 'https://www.jma.go.jp/bosai/common/const/area.json'
+    response = requests.get(url)
 
-    return 130000 # 東京
+    if(response.status_code != 200):
+        print('error')
+        return
+    
+    row_data = response.json()
+
+    # データの整形
+    # centersが地方、officesが都道府県、class10,15,20がより詳細な場所を指す
+    # 欲しいエリアコードはofficesの値
+    data = {}
+    for key2, value2 in row_data['offices'].items():
+        if 'officeName' in value2:
+            if '気象台' in value2['officeName']:
+                data[value2['name']] = key2
+
+    # print(data)
+    
+    # ソケットで取得した名前からエリアコードを取得
+    return data.get('千葉県')
 
 # 週刊天気予報をのjsonファイルを取得
-def get_weather_forecast(area = 130000):
+def get_weather_forecast(area):
     import requests
-    # あとで引数で地域を指定できるようにする
     url = 'https://www.jma.go.jp/bosai/forecast/data/forecast/' + str(area) + '.json'
     response = requests.get(url)
     
@@ -32,6 +50,7 @@ def normalize_data_today(data):
     time = data[0]['reportDatetime'] # 予報時刻
     # print(time)
 
+    area = data[0]['publishingOffice']
     date = time[0:10]
     w_code = data[0]['timeSeries'][0]['areas'][0]['weatherCodes'][0]
     weather = code2weather[int(w_code)]
@@ -40,6 +59,7 @@ def normalize_data_today(data):
     # print(date + ' ' + weather + ' ' + str(max_temp) + ' ' + str(min_temp))
 
     ret.append({
+        'area' : area,
         'now': now,
         'date': date,
         'weather': weather,
@@ -95,7 +115,7 @@ def normalize_data_week(data):
 if __name__ == '__main__':
     import json
 
-    # 天気コードと天気の対応表を作成
+    # 天気コードと天気の対応表を作成 できればこのjsonもrequestsで取得したいね
     with open(file='./application/weatherCode.json', mode='r', encoding='utf_8') as f:
         hoge = json.loads(f.read())
         for i in hoge:
@@ -103,10 +123,9 @@ if __name__ == '__main__':
     # print(code2weather)
 
     code = get_area_code()
-    data = get_weather_forecast()
+    data = get_weather_forecast(code)
     # print(data)
     output = normalize_data_today(data)
     
     with open(file='./application/weather.json', mode='w', encoding='utf_8') as f:
         json.dump(obj=output, fp=f, indent=4, ensure_ascii=False)
-    
