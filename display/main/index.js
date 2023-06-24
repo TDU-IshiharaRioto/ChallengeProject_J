@@ -1,22 +1,10 @@
+var webSocket = new WebSocket("ws://localhost:9998");
+
+Reference: https://www.nowonbun.com/247.html [明月の開発ストーリ]
 window.onload = function() {
     const timeElement = document.getElementById('time');
     const weatherElement = document.getElementById('weather');
     const yobi= new Array("日","月","火","水","木","金","土");
-    
-    var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
-    req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
-        if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
-        //alert(req.responseText);		          // 取得した JSON ファイルの中身を表示
-        const jsonObj = JSON.parse(req.responseText);
-
-        for (let item of jsonObj) {
-            console.log("date: " + item.date + " weather: " + item.weather + " max-temp: " + item.maxtemp + " mintemp: " + item.mintemp);
-        }
-        }
-    };
-    req.open("GET", "http://127.0.0.1/ChallengeProject_J/weather.json", false); // HTTPメソッドとアクセスするサーバーのURLを指定
-    req.send(null);					    // 実際にサーバーへリクエストを送信
-
 
     let new_element1 = document.createElement('li');
     new_element1.classList.add("list-group-item");
@@ -45,3 +33,13 @@ window.onload = function() {
 
     setInterval(updateTime, 1000);
 }
+
+webSocket.onopen = function(message){
+    console.log("connect");
+    webSocket.send('weather');
+    
+};
+
+webSocket.onmessage = function(message){
+    console.log(JSON.stringify(message.data));
+};
