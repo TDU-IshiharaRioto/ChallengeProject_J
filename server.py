@@ -43,15 +43,15 @@ def normalize_data(data):
     return ret
  
 async def Socket(websocket):
-    await websocket.recv()
+    await websocket.recv() # 県の名前を受け取る
     data = get_weather_forecast()
-    # print(data)
+    print(data)
     output = normalize_data(data)
     await websocket.send(str(output))
     
 async def main():
     async with websockets.serve(Socket, "localhost", 9998):
         await asyncio.Future()  # run forever
- 
+
 if __name__ == "__main__":
     asyncio.run(main())
