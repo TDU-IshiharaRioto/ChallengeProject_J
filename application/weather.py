@@ -1,5 +1,8 @@
+import asyncio
+import websockets
+
 # エリアコードの取得
-def get_area_code():
+def get_area_code(pref):
     import requests
     url = 'https://www.jma.go.jp/bosai/common/const/area.json'
     response = requests.get(url)
@@ -18,11 +21,9 @@ def get_area_code():
         if 'officeName' in value2:
             if '気象台' in value2['officeName']:
                 data[value2['name']] = key2
-
-    # print(data)
     
     # ソケットで取得した名前からエリアコードを取得
-    return data.get('千葉県')
+    return data.get(pref)
 
 # 週刊天気予報をのjsonファイルを取得
 def get_weather_forecast(area):
@@ -35,7 +36,6 @@ def get_weather_forecast(area):
         return
     
     data = response.json()
-    # print(data)
 
     return data
 
@@ -48,7 +48,6 @@ def normalize_data_today(data):
     
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') # 現在時刻
     time = data[0]['reportDatetime'] # 予報時刻
-    # print(time)
 
     area = data[0]['publishingOffice']
     date = time[0:10]
@@ -56,7 +55,6 @@ def normalize_data_today(data):
     weather = code2weather[int(w_code)]
     max_temp = data[1]['tempAverage']['areas'][0]['max']
     min_temp = data[1]['tempAverage']['areas'][0]['min']
-    # print(date + ' ' + weather + ' ' + str(max_temp) + ' ' + str(min_temp))
 
     ret.append({
         'area' : area,
@@ -79,26 +77,22 @@ def normalize_data_week(data):
     dates = []
     for i in date_row:
         dates.append(i[0:10])
-    # print(dates)
 
     weather_row = data[1]['timeSeries'][0]['areas'][0]['weatherCodes']
     weathers = []
     for i in weather_row:
         weather_code = i
         weathers.append(code2weather[int(weather_code)])
-    # print(weathers)
 
     max_temp_row = data[1]['timeSeries'][1]['areas'][0]['tempsMax']
     max_temps = []
     for i in max_temp_row:
         max_temps.append(i)
-    # print(max_temps)
 
     min_temp_row = data[1]['timeSeries'][1]['areas'][0]['tempsMin']
     min_temps = []
     for i in min_temp_row:
         min_temps.append(i)
-    # print(min_temps)
 
     for i in range(len(dates)):
         ret.append({
@@ -108,24 +102,42 @@ def normalize_data_week(data):
             'maxtemp': max_temps[i],
             'mintemp': min_temps[i]
         })
-    # print(ret)
 
     return ret
 
+
+async def Socket(websocket):
+    pref = await websocket.recv() # 県の名前を受け取る
+    area_code = get_area_code(pref) 
+    data = get_weather_forecast(area_code)
+    print(data)
+    output = normalize_data_today(data)
+    # output = normalize_data_week(data)
+    await websocket.send(str(output))
+
+async def main():
+    async with websockets.serve(Socket, "localhost", 9998):
+        await asyncio.Future()  # run forever
+
 if __name__ == '__main__':
     import json
-
-    # 天気コードと天気の対応表を作成 できればこのjsonもrequestsで取得したいね
+    # 天気コードと天気の対応表を作成
     with open(file='./application/weatherCode.json', mode='r', encoding='utf_8') as f:
         hoge = json.loads(f.read())
         for i in hoge:
             code2weather[int(i)] = hoge[i][3]
-    # print(code2weather)
 
+    # サーバーを起動
+    asyncio.run(main())
+
+    '''
+    jsonファイルを作成するためのコード
     code = get_area_code()
     data = get_weather_forecast(code)
-    # print(data)
+
     output = normalize_data_today(data)
+    output = normalize_data_week(data)
     
     with open(file='./application/weather.json', mode='w', encoding='utf_8') as f:
         json.dump(obj=output, fp=f, indent=4, ensure_ascii=False)
+    '''
