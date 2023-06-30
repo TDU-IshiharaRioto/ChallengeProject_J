@@ -130,8 +130,8 @@ def test():
 
 if __name__ == '__main__':
     import json
-    # 天気コードと天気の対応表を作成 パス関連で少し問題があるので注意
-    with open(file='./application/weatherCode.json', mode='r', encoding='utf_8') as f:
+    # 天気コードと天気の対応表を作成
+    with open(file='./weatherCode.json', mode='r', encoding='utf_8') as f:
         hoge = json.loads(f.read())
         for i in hoge:
             code2weather[int(i)] = hoge[i][3]
