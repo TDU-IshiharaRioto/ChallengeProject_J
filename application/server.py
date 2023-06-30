@@ -41,7 +41,7 @@ def normalize_data(data):
         'min-temp': min_temp
     })
     return ret
- 
+
 async def Socket(websocket):
     await websocket.recv() # 県の名前を受け取る
     data = get_weather_forecast()

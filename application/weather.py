@@ -19,9 +19,11 @@ def get_area_code(pref):
     data = {}
     for key2, value2 in row_data['offices'].items():
         if 'officeName' in value2:
-            if '気象台' in value2['officeName']:
+            if '気象台' or '気象庁' in value2['officeName']:
                 data[value2['name']] = key2
     
+    print(data)
+
     # ソケットで取得した名前からエリアコードを取得
     return data.get(pref)
 
@@ -119,13 +121,22 @@ async def main():
     async with websockets.serve(Socket, "localhost", 9998):
         await asyncio.Future()  # run forever
 
+def test():
+    pref = '東京都'
+    area_code = get_area_code(pref)
+    data = get_weather_forecast(area_code)
+    output = normalize_data_today(data)
+    print(output)
+
 if __name__ == '__main__':
     import json
-    # 天気コードと天気の対応表を作成
+    # 天気コードと天気の対応表を作成 パス関連で少し問題があるので注意
     with open(file='./application/weatherCode.json', mode='r', encoding='utf_8') as f:
         hoge = json.loads(f.read())
         for i in hoge:
             code2weather[int(i)] = hoge[i][3]
+    
+    test()
 
     # サーバーを起動
     asyncio.run(main())
