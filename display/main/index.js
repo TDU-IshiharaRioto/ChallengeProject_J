@@ -3,19 +3,9 @@ var webSocket = new WebSocket("ws://localhost:9998");
 Reference: https://www.nowonbun.com/247.html [明月の開発ストーリ]
 window.onload = function() {
     const timeElement = document.getElementById('time');
-    const weatherElement = document.getElementById('weather');
+    
     const yobi= new Array("日","月","火","水","木","金","土");
 
-    let new_element1 = document.createElement('li');
-    new_element1.classList.add("list-group-item");
-    new_element1.textContent = ' 遅延';
-
-    let new_element2 = document.createElement('li');
-    new_element2.classList.add("list-group-item");
-    new_element2.textContent = ' 遅延2';
-
-    document.getElementById("traffic").appendChild(new_element1);
-    document.getElementById("traffic").appendChild(new_element2);
 
     
     function updateTime() {
@@ -36,10 +26,17 @@ window.onload = function() {
 
 webSocket.onopen = function(message){
     console.log("connect");
-    webSocket.send('weather');
+    webSocket.send('東京都');
     
 };
 
 webSocket.onmessage = function(message){
-    console.log(JSON.stringify(message.data));
+    var msg = message.data;
+    msg = msg.replace(/'/g,"\"");
+    obj = JSON.parse(msg);
+
+    const weatherElement = document.getElementById('weather');
+    weatherElement.textContent = obj["0"]["weather"] + " " + obj["0"]["maxtemp"] + "℃ / " + obj["0"]["mintemp"] + "℃";
+
+
 };

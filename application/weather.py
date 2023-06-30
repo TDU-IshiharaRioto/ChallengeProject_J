@@ -19,7 +19,7 @@ def get_area_code(pref):
     data = {}
     for key2, value2 in row_data['offices'].items():
         if 'officeName' in value2:
-            if '気象台' in value2['officeName']:
+            if '気象台' or '気象庁' in value2['officeName']:
                 data[value2['name']] = key2
     
     # ソケットで取得した名前からエリアコードを取得
@@ -122,7 +122,7 @@ async def main():
 if __name__ == '__main__':
     import json
     # 天気コードと天気の対応表を作成
-    with open(file='./application/weatherCode.json', mode='r', encoding='utf_8') as f:
+    with open(file='./weatherCode.json', mode='r', encoding='utf_8') as f:
         hoge = json.loads(f.read())
         for i in hoge:
             code2weather[int(i)] = hoge[i][3]
