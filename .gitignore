@@ -2,4 +2,5 @@
 weather.json
 credentials.json
 quickstart.py
-token.py
+mytoken.py
+./__pycache__
