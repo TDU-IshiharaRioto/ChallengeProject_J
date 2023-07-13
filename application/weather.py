@@ -113,7 +113,7 @@ async def Socket(websocket):
     print(data)
     output = normalize_data_today(data)
     # output = normalize_data_week(data)
-    await websocket.send(str(output))
+    await websocket.send(str(output).replace('\'','\"'))
 
 async def main():
     async with websockets.serve(Socket, "localhost", 9998):
