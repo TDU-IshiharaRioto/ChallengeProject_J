@@ -1,8 +1,12 @@
 
+quickstart.py
 weather.json
 task.json
+
+secret.js
 credentials.json
-quickstart.py
 mytoken.py
+node_modules
+
 ./__pycache__
 tempCodeRunnerFile.py
