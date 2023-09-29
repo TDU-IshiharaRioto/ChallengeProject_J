@@ -2,9 +2,7 @@
 
 import asyncio
 import websockets
-import time
 import JREastInformation as jre
-import json
 
 async def handler(websocket):
     try:    
@@ -13,16 +11,28 @@ async def handler(websocket):
             data = await websocket.recv()
             print ("受信：" + data)
 
-            status = jre.getJREastInformation()
+            statusKantou = jre.getJREastInformation()
+            statusTohoku = jre.getJREastTohokuInformation()
+            status = statusKantou + statusTohoku
+            print ("東北部分の長さ：" + str(len(status)))
             result = ""
 
+            count = 0
             for i in range(0, len(status), 2):
+                print ("検索中・・・（" +  str(i) + "件目）" + status[i])
                 if status[i] == data:
-                    result = status[i] + "は、" + status[i + 1] + "です。"
+                    count  = count + 1
+                    result = status[i + 1]
+                    name = status[i]
+                    await websocket.send(str(count))
+                    await websocket.send(name)
                     await websocket.send(result)
-                    return
-            await websocket.send("NOTFOUND")
-            print("見つかりませんでした。")
+                    print("送信：" + str(count) + "件目：" + result)
+                    
+                if i == len(status) - 2 and count == 0:
+                    await websocket.send("NOTFOUND")
+                    print("見つかりませんでした。")
+            
     except KeyboardInterrupt:
         print("サーバーを終了します・・・")
         print("終了しました。")
