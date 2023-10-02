@@ -25,7 +25,7 @@ async def handler(websocket):
             if data == "ALL":
                 for i in range(0, len(status), 2):
                     for l in range(sendedCount):
-                        if sended[l] == status[i] + status[i + 1]:
+                        if l != 0 and sended[l] == status[i] + status[i + 1]:
                             continue
                         else:
                             count  = count + 1
@@ -42,8 +42,8 @@ async def handler(websocket):
             for i in range(0, len(status), 2):
                 print ("検索中・・・（" +  str(i) + "件目）" + status[i])
                 if status[i] == data:
-                    for l in range(sendedCount + 1):
-                        if sended[l] == status[i] + status[i + 1]:
+                    for l in range(sendedCount):
+                        if l != 0 and sended[l] == status[i] + status[i + 1]:
                             continue
                         else:
                             count  = count + 1
