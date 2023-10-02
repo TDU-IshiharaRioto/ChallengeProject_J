@@ -3,7 +3,6 @@
 from bs4 import BeautifulSoup
 import requests as req
 
-
 def getJREastInformation():
     url = "https://www.tokyometro.jp/"
 
@@ -22,5 +21,3 @@ def getJREastInformation():
         resultList.append(statusList[i].getText().replace("\n", ""))
         # print(lineList[i].getText() + " " + statusList[i].getText().replace("\n", ""))
     return resultList
-
-

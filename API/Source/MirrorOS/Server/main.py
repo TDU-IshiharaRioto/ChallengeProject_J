@@ -14,7 +14,7 @@ async def handler(websocket):
             statusKantou = jre.getJREastInformation()
             statusTohoku = jre.getJREastTohokuInformation()
             status = statusKantou + statusTohoku
-            print ("東北部分の長さ：" + str(len(status)))
+            print ("長さ：" + str(len(status)))
             result = ""
 
             count = 0
@@ -37,7 +37,7 @@ async def handler(websocket):
         print("サーバーを終了します・・・")
         print("終了しました。")
 
-server = websockets.serve(handler, "133.14.196.157", 100)
+server = websockets.serve(handler, "100.2.6.11", 4)
 loop = asyncio.get_event_loop()
 try:
     loop.run_until_complete(server)
