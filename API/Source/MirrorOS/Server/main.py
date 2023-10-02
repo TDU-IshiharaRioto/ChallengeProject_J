@@ -20,7 +20,7 @@ async def handler(websocket):
             result = ""
 
             count = 0
-            sended = ""
+            sended = ["" for i in range(len(status) / 2)]
             sendedCount = 0
             if data == "ALL":
                 for i in range(0, len(status), 2):
@@ -47,7 +47,8 @@ async def handler(websocket):
                     result = status[i + 1]
                     name = status[i]
 
-                    for l in range(sendedCount):
+                    l = 0
+                    while True:                          
                         if sended[l] == status[i] + status[i + 1]:
                             print("同一内容のためスキップ" + str(count) + "件目：" + name + "：" + result)
                             continue
@@ -58,6 +59,7 @@ async def handler(websocket):
                             sended[sendedCount] = status[i] + status[i + 1]
                             sendedCount = sendedCount + 1
                             print("送信：" + str(count) + "件目：" + name + "：" + result)                 
+                        l = l + 1
                 if i == len(status) - 2 and count == 0:
                     await websocket.send("NOTFOUND")
                     print("見つかりませんでした。")
