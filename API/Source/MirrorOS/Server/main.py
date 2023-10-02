@@ -27,8 +27,8 @@ async def handler(websocket):
                     await websocket.send(str(count))
                     await websocket.send(name)
                     await websocket.send(result)
-                    print("送信：" + str(count) + "件目：" + result)
-                    continue
+                    print("送信：" + str(count) + "件目：" + name + "：" + result)
+                continue
             
             for i in range(0, len(status), 2):
                 print ("検索中・・・（" +  str(i) + "件目）" + status[i])
@@ -39,7 +39,7 @@ async def handler(websocket):
                     await websocket.send(str(count))
                     await websocket.send(name)
                     await websocket.send(result)
-                    print("送信：" + str(count) + "件目：" + result)
+                    print("送信：" + str(count) + "件目：" + name + "：" + result)
                     
                 if i == len(status) - 2 and count == 0:
                     await websocket.send("NOTFOUND")
