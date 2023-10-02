@@ -27,16 +27,15 @@ async def handler(websocket):
                     for l in range(sendedCount):
                         if l != 0 and sended[l] == status[i] + status[i + 1]:
                             continue
-                        else:
-                            count  = count + 1
-                            result = status[i + 1]
-                            name = status[i]
-                            await websocket.send(str(count))
-                            await websocket.send(name)
-                            await websocket.send(result)
-                            sended[sendedCount] = status[i] + status[i + 1]
-                            sendedCount = sendedCount + 1
-                            print("送信：" + str(count) + "件目：" + name + "：" + result)
+                        count  = count + 1
+                        result = status[i + 1]
+                        name = status[i]
+                        await websocket.send(str(count))
+                        await websocket.send(name)
+                        await websocket.send(result)
+                        sended[sendedCount] = status[i] + status[i + 1]
+                        sendedCount = sendedCount + 1
+                        print("送信：" + str(count) + "件目：" + name + "：" + result)
                 continue
             
             for i in range(0, len(status), 2):
@@ -45,16 +44,15 @@ async def handler(websocket):
                     for l in range(sendedCount):
                         if l != 0 and sended[l] == status[i] + status[i + 1]:
                             continue
-                        else:
-                            count  = count + 1
-                            result = status[i + 1]
-                            name = status[i]
-                            await websocket.send(str(count))
-                            await websocket.send(name)
-                            await websocket.send(result)
-                            sended[sendedCount] =  status[i] + status[i + 1]
-                            sendedCount = sendedCount + 1
-                            print("送信：" + str(count) + "件目：" + name + "：" + result)                    
+                        count  = count + 1
+                        result = status[i + 1]
+                        name = status[i]
+                        await websocket.send(str(count))
+                        await websocket.send(name)
+                        await websocket.send(result)
+                        sended[sendedCount] =  status[i] + status[i + 1]
+                        sendedCount = sendedCount + 1
+                        print("送信：" + str(count) + "件目：" + name + "：" + result)                    
                 if i == len(status) - 2 and count == 0:
                     await websocket.send("NOTFOUND")
                     print("見つかりませんでした。")
