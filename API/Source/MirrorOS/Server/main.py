@@ -8,6 +8,7 @@ async def handler(websocket):
     try:    
         print("接続されました。")
         while True:
+            print("待機中です・・・")
             data = await websocket.recv()
             print ("受信：" + data)
 
@@ -18,6 +19,17 @@ async def handler(websocket):
             result = ""
 
             count = 0
+            if data == "ALL":
+                for i in range(0, len(status), 2):
+                    count  = count + 1
+                    result = status[i + 1]
+                    name = status[i]
+                    await websocket.send(str(count))
+                    await websocket.send(name)
+                    await websocket.send(result)
+                    print("送信：" + str(count) + "件目：" + result)
+                    continue
+            
             for i in range(0, len(status), 2):
                 print ("検索中・・・（" +  str(i) + "件目）" + status[i])
                 if status[i] == data:
