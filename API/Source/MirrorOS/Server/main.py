@@ -16,31 +16,45 @@ async def handler(websocket):
             statusTohoku = jre.getJREastTohokuInformation()
             status = statusKantou + statusTohoku
             print ("長さ：" + str(len(status)))
+            print ("路線数：" + str(len(status) / 2))
             result = ""
 
             count = 0
+            sended = ""
+            sendedCount = 0
             if data == "ALL":
                 for i in range(0, len(status), 2):
-                    count  = count + 1
-                    result = status[i + 1]
-                    name = status[i]
-                    await websocket.send(str(count))
-                    await websocket.send(name)
-                    await websocket.send(result)
-                    print("送信：" + str(count) + "件目：" + name + "：" + result)
+                    for l in range(sendedCount):
+                        if sended[l] == status[i] + status[i + 1]:
+                            continue
+                        else:
+                            count  = count + 1
+                            result = status[i + 1]
+                            name = status[i]
+                            await websocket.send(str(count))
+                            await websocket.send(name)
+                            await websocket.send(result)
+                            sended[sendedCount] = status[i] + status[i + 1]
+                            sendedCount = sendedCount + 1
+                            print("送信：" + str(count) + "件目：" + name + "：" + result)
                 continue
             
             for i in range(0, len(status), 2):
                 print ("検索中・・・（" +  str(i) + "件目）" + status[i])
                 if status[i] == data:
-                    count  = count + 1
-                    result = status[i + 1]
-                    name = status[i]
-                    await websocket.send(str(count))
-                    await websocket.send(name)
-                    await websocket.send(result)
-                    print("送信：" + str(count) + "件目：" + name + "：" + result)
-                    
+                    for l in range(sendedCount):
+                        if sendedCount[l] == status[i] + status[i + 1]:
+                            continue
+                        else:
+                            count  = count + 1
+                            result = status[i + 1]
+                            name = status[i]
+                            await websocket.send(str(count))
+                            await websocket.send(name)
+                            await websocket.send(result)
+                            sended[sendedCount] =  status[i] + status[i + 1]
+                            sendedCount = sendedCount + 1
+                            print("送信：" + str(count) + "件目：" + name + "：" + result)                    
                 if i == len(status) - 2 and count == 0:
                     await websocket.send("NOTFOUND")
                     print("見つかりませんでした。")
