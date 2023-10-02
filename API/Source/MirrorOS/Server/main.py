@@ -20,7 +20,7 @@ async def handler(websocket):
             result = ""
 
             count = 0
-            sended = ["" for i in range(len(status) / 2)]
+            sended = ["" for i in range(int(len(status) / 2))]
             sendedCount = 0
             if data == "ALL":
                 for i in range(0, len(status), 2):
