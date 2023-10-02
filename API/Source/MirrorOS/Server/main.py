@@ -27,7 +27,7 @@ async def handler(websocket):
                     for l in range(sendedCount + 1):
                         if sendedCount + 1 > len(sended):
                             continue
-                        print ("sended[l] = " + sended[l])
+                        print ("sended[l] = " + str(sended[l]))
                         if sended[l] == status[i] + status[i + 1]:
                             continue
                         count  = count + 1
