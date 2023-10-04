@@ -46,14 +46,18 @@ obama_image = face_recognition.load_image_file("obama.jpg")
 obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
 biden_image = face_recognition.load_image_file("biden.jpg")
 biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
+makoto_image = face_recognition.load_image_file("makoto.jpg")
+makoto_face_encoding = face_recognition.face_encodings(makoto_image)[0]
 
 known_face_encodings = [
     obama_face_encoding,
     biden_face_encoding,
+    makoto_face_encoding,
 ]
 known_face_names = [
     "Barack Obama",
     "Joe Biden",
+    "Makoto"
 ]
 
 last_recognized_names = []
@@ -82,8 +86,9 @@ while True:
         if name not in last_recognized_names:
             print(f"Recognized: {name}")
             server.send_message_to_all(f"Recognized: {name}")
+            last_recognized_names = current_recognized_names.copy()
 
-    last_recognized_names = current_recognized_names.copy()
+    
     cv2.imshow('Video', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
