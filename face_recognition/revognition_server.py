@@ -18,16 +18,19 @@ signal.signal(signal.SIGINT, signal_handler)
 
 # WebSocketサーバーのコールバック関数
 def new_client(client, server):
-    print("New client connected and was given id %d" % client['id'])
-    server.send_message_to_all("Hey all, a new client has joined us")
+    global last_recognized_names  # グローバル変数として参照する
+    print("New client connected")
+    last_recognized_names = []  # リセット
+    print("New client connected")
+    server.send_message_to_all("Unknown")
 
 def client_left(client, server):
-    print("Client(%d) disconnected" % client['id'])
+    print("Client disconnected")
 
 def message_received(client, server, message):
     if len(message) > 200:
         message = message[:200]+'..'
-    print("Client(%d) said: %s" % (client['id'], message))
+    print("Client said: %s" % (client['id'], message))
 
 # WebSocketサーバーの初期設定
 PORT=5001
@@ -64,19 +67,26 @@ last_recognized_names = []
 
 while True:
     ret, frame = video_capture.read()
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+    rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
     face_locations = face_recognition.face_locations(rgb_frame)
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
     current_recognized_names = []
 
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+        matches = face_recognition.compare_faces(known_face_encodings, face_encoding,tolerance=0.4)
         name = "Unknown"
         face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
         best_match_index = np.argmin(face_distances)
         if matches[best_match_index]:
             name = known_face_names[best_match_index]
-        current_recognized_names.append(name)
+            current_recognized_names.append(name)
+        
+        top *= 4
+        right *= 4
+        bottom *= 4
+        left *= 4
+
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
         cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
@@ -85,7 +95,7 @@ while True:
     for name in current_recognized_names:
         if name not in last_recognized_names:
             print(f"Recognized: {name}")
-            server.send_message_to_all(f"Recognized: {name}")
+            server.send_message_to_all(name)
             last_recognized_names = current_recognized_names.copy()
 
     
