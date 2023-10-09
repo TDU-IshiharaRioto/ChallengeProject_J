@@ -12,27 +12,24 @@ async def handler(websocket):
             data = await websocket.recv()
             print ("受信：" + data)
 
-            statusKantou = jre.getJREastInformation()
-            statusTohoku = jre.getJREastTohokuInformation()
-            statusShinkansen = jre.getShinkansenInformation()
-            status = statusKantou + statusTohoku + statusShinkansen
-            print ("長さ：" + str(len(status)))
-            print ("路線数：" + str(len(status) / 2))
+            statusJREast = jre.getJREastInformation()
+            print ("長さ：" + str(len(statusJREast)))
+            print ("路線数：" + str(len(statusJREast) / 2))
             result = ""
 
             count = 0
-            sended = ["" for i in range(int(len(status) / 2))]
+            sended = ["" for i in range(int(len(statusJREast) / 2))]
             sendedCount = 0
             if data == "ALL":
                 print("メッセージ：全ての路線を送信します。")
-                for i in range(0, len(status), 2):
+                for i in range(0, len(statusJREast), 2):
                     count  = count + 1
-                    result = status[i + 1]
-                    name = status[i]
+                    result = statusJREast[i + 1]
+                    name = statusJREast[i]
                     isSended = False
 
                     for l in range(sendedCount):
-                        if sended[l] == status[i] + status[i + 1]:
+                        if sended[l] == statusJREast[i] + statusJREast[i + 1]:
                             print("同一内容のためスキップ" + str(count) + "件目：" + name + "：" + result)
                             isSended = True
                             break
@@ -41,21 +38,21 @@ async def handler(websocket):
                         await websocket.send(str(count))
                         await websocket.send(name)
                         await websocket.send(result)
-                        sended[sendedCount] = status[i] + status[i + 1]
+                        sended[sendedCount] = statusJREast[i] + statusJREast[i + 1]
                         sendedCount = sendedCount + 1
                         print("送信：" + str(count) + "件目：" + name + "：" + result)
             else:
                 print("メッセージ：指定された路線を送信します。" + data)
-                for i in range(0, len(status), 2):
-                    print ("検索中・・・（" +  str(i) + "件目）" + status[i])
-                    if status[i] == data:
+                for i in range(0, len(statusJREast), 2):
+                    print ("検索中・・・（" +  str(i) + "件目）" + statusJREast[i])
+                    if statusJREast[i] == data:
                         count  = count + 1
-                        result = status[i + 1]
-                        name = status[i]
+                        result = statusJREast[i + 1]
+                        name = statusJREast[i]
                         isSended = False
 
                         for l in range(sendedCount):
-                            if sended[l] == status[i] + status[i + 1]:
+                            if sended[l] == statusJREast[i] + statusJREast[i + 1]:
                                 print("同一内容のためスキップ" + str(count) + "件目：" + name + "：" + result)
                                 isSended = True
                                 break
@@ -64,10 +61,10 @@ async def handler(websocket):
                             await websocket.send(str(count))
                             await websocket.send(name)
                             await websocket.send(result)
-                            sended[sendedCount] = status[i] + status[i + 1]
+                            sended[sendedCount] = statusJREast[i] + statusJREast[i + 1]
                             sendedCount = sendedCount + 1
                             print("送信：" + str(count) + "件目：" + name + "：" + result)
-                    if i == len(status) - 2 and count == 0:
+                    if i == len(statusJREast) - 2 and count == 0:
                         await websocket.send("NOTFOUND")
                         print("見つかりませんでした。")
             
