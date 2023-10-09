@@ -57,7 +57,7 @@ async def handler(websocket):
                         sendedCount = sendedCount + 1
                         await websocket.send(sendedCount)
                         await websocket.send(statusJREast[i])
-                        print("送信：" + sendedCount + "件目：" + statusJREast[i])
+                        print("送信：" + str(sendedCount) + "件目：" + statusJREast[i])
             else:
                 print("メッセージ：指定された路線を送信します。" + data)
                 for i in range(0, len(statusJREast), 2):
@@ -80,7 +80,7 @@ async def handler(websocket):
                             await websocket.send(result)
                             sended[sendedCount] = statusJREast[i] + statusJREast[i + 1]
                             sendedCount = sendedCount + 1
-                            print("送信：" + sendedCount + "件目：" + name + "：" + result)
+                            print("送信：" + str(sendedCount) + "件目：" + name + "：" + result)
                     if i == len(statusJREast) - 2 and count == 0:
                         await websocket.send("NOTFOUND")
                         print("見つかりませんでした。")
