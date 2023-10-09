@@ -35,12 +35,13 @@ async def handler(websocket):
                             break
 
                     if isSended == False:
-                        await websocket.send(str(count))
-                        await websocket.send(name)
-                        await websocket.send(result)
+                        
                         sended[sendedCount] = statusJREast[i] + statusJREast[i + 1]
                         sendedCount = sendedCount + 1
-                        print("送信：" + str(count) + "件目：" + name + "：" + result)
+                        await websocket.send(str(sendedCount))
+                        await websocket.send(name)
+                        await websocket.send(result)
+                        print("送信：" + str(sendedCount) + "件目：" + name + "：" + result)
             elif data == "LIST":
                 print ("メッセージ：路線一覧を送信します。")
                 for i in range(0, len(statusJREast), 2):
@@ -55,7 +56,7 @@ async def handler(websocket):
                     if isSended == False:
                         sended[sendedCount] = statusJREast[i]
                         sendedCount = sendedCount + 1
-                        await websocket.send(sendedCount)
+                        await websocket.send(str(sendedCount))
                         await websocket.send(statusJREast[i])
                         print("送信：" + str(sendedCount) + "件目：" + statusJREast[i])
             else:
