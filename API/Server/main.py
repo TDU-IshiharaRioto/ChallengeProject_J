@@ -44,8 +44,6 @@ async def handler(websocket):
             elif data == "LIST":
                 print ("メッセージ：路線一覧を送信します。")
                 for i in range(0, len(statusJREast), 2):
-                    sended = []
-                    sendedCount = 0
                     isSended = False
 
                     for l in range(sendedCount):
