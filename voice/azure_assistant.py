@@ -9,6 +9,8 @@ openai.api_version = "2023-07-01-preview"
 openai.api_type = "azure"
 openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
 
+recognized_text = ""
+
 # Creates an instance of a speech config with specified subscription key and service region.
 # Replace with cyour own subscription key and service region (e.g., "westus").
 speech_key, service_region, language = "dc840a90894642feba11385afc990655", "japaneast", "ja-JP"
@@ -32,21 +34,13 @@ speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, au
 print("Say something...")
 
 def recognized(evt):
+    global recognized_text
     if evt.result.text == "":
         return
+    if recognized_text != "":
+        return
     print('「{}」'.format(evt.result.text))
-    try:
-        response = openai.ChatCompletion.create(
-            engine="gpt-35-turbo",
-            messages=[{"role": "user", "content": evt.result.text}],
-        )
-    except Exception as e:
-        print(e)
-    print(response['choices'][0]['message']['content'])
-    speech_synthesis_result = speech_synthesizer.speak_text_async(response['choices'][0]['message']['content']).get()
-    
-
-
+    recognized_text = evt.result.text
 
 def start(evt):
     print('SESSION STARTED: {}'.format(evt))
@@ -61,5 +55,18 @@ speech_recognizer.session_stopped.connect(stop)
 
 speech_recognizer.start_continuous_recognition()
 
+
 while True:
-    time.sleep(1)
+    time.sleep(0.5)
+    if(recognized_text != ""):
+        try:
+            response = openai.ChatCompletion.create(
+                engine="gpt-35-turbo",
+                messages=[{"role": "user", "content": recognized_text}],
+            )
+        except Exception as e:
+            print(e)
+        recognized_text = ""
+        print(response['choices'][0]['message']['content'])
+        speech_synthesis_result = speech_synthesizer.speak_text(response['choices'][0]['message']['content'])
+        recognized_text = ""
