@@ -10,7 +10,7 @@ openai.api_type = "azure"
 openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 recognized_text = ""
-isSpeaking = False
+pre_recognized = False
 
 # Creates an instance of a speech config with specified subscription key and service region.
 # Replace with cyour own subscription key and service region (e.g., "westus").
@@ -59,17 +59,23 @@ speech_recognizer.start_continuous_recognition()
 while True:
     time.sleep(0.5)
     if(recognized_text != ""):
-        try:
-            response = openai.ChatCompletion.create(
-                engine="gpt-35-turbo",
-                messages=[{"role": "user", "content": recognized_text}],
-            )
-        except Exception as e:
-            print(e)
-        recognized_text = ""
-        print(response['choices'][0]['message']['content'])
-        speech_recognizer.stop_continuous_recognition()
-        speech_synthesis_result = speech_synthesizer.speak_text(response['choices'][0]['message']['content'])
-        speech_recognizer.start_continuous_recognition()
-        isSpeaking = False
-        recognized_text = ""
+        if(("鏡よ" in recognized_text  or "鏡を" in recognized_text) and pre_recognized == False):
+            speech_recognizer.stop_continuous_recognition()
+            speech_synthesis_result = speech_synthesizer.speak_text("はい、どうしましたか？")
+            speech_recognizer.start_continuous_recognition()
+            recognized_text = ""
+            pre_recognized = True
+        elif(pre_recognized == True):
+            try:
+                response = openai.ChatCompletion.create(
+                    engine="gpt-35-turbo",
+                    messages=[{"role": "user", "content": recognized_text}]
+                )
+            except Exception as e:
+                print(e)
+            print(response['choices'][0]['message']['content'])
+            speech_recognizer.stop_continuous_recognition()
+            speech_synthesis_result = speech_synthesizer.speak_text(response['choices'][0]['message']['content'])
+            speech_recognizer.start_continuous_recognition()
+            recognized_text = ""
+            pre_recognized = False
