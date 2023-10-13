@@ -10,6 +10,7 @@ openai.api_type = "azure"
 openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 recognized_text = ""
+isSpeaking = False
 
 # Creates an instance of a speech config with specified subscription key and service region.
 # Replace with cyour own subscription key and service region (e.g., "westus").
@@ -17,7 +18,8 @@ speech_key, service_region, language = "dc840a90894642feba11385afc990655", "japa
 speech_config = speechsdk.SpeechConfig(
     subscription=speech_key, region=service_region, speech_recognition_language=language)
 
-audio_input_config = speechsdk.AudioConfig(device_name="{0.0.1.00000000}.{f4230723-0f8c-4396-aa65-59ebe2d673ad}")
+#audio_input_config = speechsdk.AudioConfig(device_name="{0.0.1.00000000}.{f4230723-0f8c-4396-aa65-59ebe2d673ad}") #desktop
+audio_input_config = speechsdk.AudioConfig(device_name="{0.0.1.00000000}.{df9eb445-88de-467c-b50e-60e6630de919}") #laptop
 # Creates a recognizer with the given settings
 speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input_config)
 
@@ -36,8 +38,6 @@ print("Say something...")
 def recognized(evt):
     global recognized_text
     if evt.result.text == "":
-        return
-    if recognized_text != "":
         return
     print('「{}」'.format(evt.result.text))
     recognized_text = evt.result.text
@@ -68,5 +68,8 @@ while True:
             print(e)
         recognized_text = ""
         print(response['choices'][0]['message']['content'])
+        speech_recognizer.stop_continuous_recognition()
         speech_synthesis_result = speech_synthesizer.speak_text(response['choices'][0]['message']['content'])
+        speech_recognizer.start_continuous_recognition()
+        isSpeaking = False
         recognized_text = ""
