@@ -21,16 +21,14 @@ def new_client(client, server):
     global last_recognized_names  # グローバル変数として参照する
     print("New client connected")
     last_recognized_names = []  # リセット
-    print("New client connected")
-    server.send_message_to_all("Unknown")
 
 def client_left(client, server):
     print("Client disconnected")
 
 def message_received(client, server, message):
-    if len(message) > 200:
-        message = message[:200]+'..'
-    print("Client said: %s" % (client['id'], message))
+    global last_recognized_names  # グローバル変数として参照する
+    server.send_message_to_all(",".join(last_recognized_names))
+        
 
 # WebSocketサーバーの初期設定
 PORT=5001
@@ -60,28 +58,38 @@ known_face_encodings = [
 known_face_names = [
     "Barack Obama",
     "Joe Biden",
-    "Makoto"
+    "Nakatsu",
 ]
 
 last_recognized_names = []
 
+recognition_repeat = 3
 while True:
     ret, frame = video_capture.read()
     small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
     rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
     face_locations = face_recognition.face_locations(rgb_frame)
-    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
-    current_recognized_names = []
+    
+    all_recognized_names_for_current_frame = []
 
-    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-        matches = face_recognition.compare_faces(known_face_encodings, face_encoding,tolerance=0.4)
-        name = "Unknown"
-        face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-        best_match_index = np.argmin(face_distances)
-        if matches[best_match_index]:
-            name = known_face_names[best_match_index]
-            current_recognized_names.append(name)
-        
+    for (top, right, bottom, left) in face_locations:
+        names_counter = {}
+
+        # Recognition repeated for increased accuracy
+        for _ in range(recognition_repeat):
+            face_encodings = face_recognition.face_encodings(rgb_frame, [(top, right, bottom, left)])
+            if face_encodings:
+                face_encoding = face_encodings[0]
+                matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.4)
+                face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+                best_match_index = np.argmin(face_distances)
+                name = known_face_names[best_match_index] if matches[best_match_index] else "Unknown"
+                names_counter[name] = names_counter.get(name, 0) + 1
+
+        # Choosing the name that was recognized the most times
+        most_recognized_name = max(names_counter, key=names_counter.get)
+        all_recognized_names_for_current_frame.append(most_recognized_name)
+
         top *= 4
         right *= 4
         bottom *= 4
@@ -90,18 +98,18 @@ while True:
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
         cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+        cv2.putText(frame, most_recognized_name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-    for name in current_recognized_names:
-        if name not in last_recognized_names:
-            print(f"Recognized: {name}")
-            server.send_message_to_all(name)
-            last_recognized_names = current_recognized_names.copy()
+    # Check for changes in recognized names and print only if there's a change
+    if set(last_recognized_names) != set(all_recognized_names_for_current_frame):
+        print(all_recognized_names_for_current_frame)
+        server.send_message_to_all(",".join(all_recognized_names_for_current_frame))
 
-    
+    last_recognized_names = all_recognized_names_for_current_frame.copy()
+
     cv2.imshow('Video', frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    cv2.waitKey(1)
+
 
 video_capture.release()
 cv2.destroyAllWindows()
