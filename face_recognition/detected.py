@@ -50,7 +50,7 @@ def main():
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
             id, confidence = recognizer.predict(gray[y:y + h, x:x + w])
             
-            id_name = names[id] if confidence < 80 else "unknown"
+            id_name = names[id] if confidence < 60 else "unknown"
             confidence_text = "  {0}%".format(round(100 - confidence))
             
             if prev_id == None and id_name != "unknown":
