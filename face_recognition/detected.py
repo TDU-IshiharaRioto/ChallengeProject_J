@@ -45,7 +45,7 @@ def detect_faces(gray, face_cascade, minW, minH):
     )
 
 def main():
-    recognizer, face_cascade = initialize_recognizer('.\\trainer.yml', 'haarcascade_frontalface_default.xml')
+    recognizer, face_cascade = initialize_recognizer('trainer.yml', 'haarcascade_frontalface_default.xml')
     font = cv2.FONT_HERSHEY_SIMPLEX
     names = ['None', 'nakatsu',"obama"]
 
