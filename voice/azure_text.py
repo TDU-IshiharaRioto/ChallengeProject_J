@@ -7,7 +7,7 @@ speech_key, service_region, language = "dc840a90894642feba11385afc990655", "japa
 speech_config = speechsdk.SpeechConfig(
     subscription=speech_key, region=service_region, speech_recognition_language=language)
 
-audio_config = speechsdk.AudioConfig(device_name="{0.0.1.00000000}.{f4230723-0f8c-4396-aa65-59ebe2d673ad}")
+audio_config = speechsdk.AudioConfig(use_default_microphone = True)
 # Creates a recognizer with the given settings
 speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 

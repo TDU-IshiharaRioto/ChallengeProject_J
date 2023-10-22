@@ -1,6 +1,34 @@
 import cv2
 import numpy as np
 import time
+from websocket_server import WebsocketServer
+import threading
+import signal
+import sys
+
+# SIGINTハンドラ関数
+def signal_handler(sig, frame):
+    print("Shutting down gracefully...")
+    server.shutdown()
+    cv2.destroyAllWindows()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
+# WebSocketサーバーのコールバック関数
+def new_client(client, server):
+    global last_recognized_names  # グローバル変数として参照する
+    print("New client connected")
+    last_recognized_names = []  # リセット
+
+def client_left(client, server):
+    print("Client disconnected")
+
+def message_received(client, server, message):
+    global last_recognized_names  # グローバル変数として参照する
+    server.send_message_to_all(",".join(last_recognized_names))
+
+
 
 def initialize_recognizer(trainer_path, cascade_path):
     recognizer = cv2.face.LBPHFaceRecognizer_create()
@@ -17,7 +45,7 @@ def detect_faces(gray, face_cascade, minW, minH):
     )
 
 def main():
-    recognizer, face_cascade = initialize_recognizer('.\\trainer.yml', 'haarcascade_frontalface_default.xml')
+    recognizer, face_cascade = initialize_recognizer('trainer.yml', 'haarcascade_frontalface_default.xml')
     font = cv2.FONT_HERSHEY_SIMPLEX
     names = ['None', 'nakatsu',"obama"]
 
@@ -38,10 +66,14 @@ def main():
 
         if len(faces) > 0:
             if not detected_printed:
+                message = '{"isDetected" : true}'
+                server.send_message_to_all(message)
                 print("検出")
                 detected_printed, not_detected_printed = True, False
             last_detected_time = time.time()
-        elif last_detected_time and time.time() - last_detected_time > 10 and not not_detected_printed:
+        elif last_detected_time and time.time() - last_detected_time > 5 and not not_detected_printed:
+            message = '{"isDetected" : false}'
+            server.send_message_to_all(message)
             print("非検出")
             detected_printed, not_detected_printed = False, True
             prev_id = None
@@ -68,5 +100,14 @@ def main():
     cam.release()
     cv2.destroyAllWindows()
 
-if __name__ == "__main__":
-    main()
+# WebSocketサーバーの初期設定
+server = WebsocketServer(host="127.0.0.1", port=5001)
+server.set_fn_new_client(new_client)
+server.set_fn_client_left(client_left)
+server.set_fn_message_received(message_received)
+
+# 別のスレッドでWebSocketサーバーを起動
+thread = threading.Thread(target=server.run_forever)
+thread.start()
+
+main()
