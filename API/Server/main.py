@@ -3,6 +3,7 @@
 import asyncio
 import websockets
 import JREastInformation as jre
+import TokyoMetro
 
 async def handler(websocket):
     try:    
@@ -12,7 +13,13 @@ async def handler(websocket):
             data = await websocket.recv()
             print ("受信：" + data)
 
+            # データ取得部分
             statusJREast = jre.getJREastInformation()
+            statusTokyoMetro = TokyoMetro.getTokyoMetroInformation()
+
+            # 結合
+            StatusData = statusJREast + statusTokyoMetro
+
             print ("長さ：" + str(len(statusJREast)))
             print ("路線数：" + str(len(statusJREast) / 2))
             result = ""
