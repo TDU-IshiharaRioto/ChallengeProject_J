@@ -77,33 +77,18 @@ def main_loop():
 
     while True:
         time.sleep(1)
-        
-        # 10秒間のタイムアウトをチェック
-        if session_active and time.time() - last_input_time > 10:
-            session_active = False
-            messages_history = []
-            print("セッションがタイムアウトしました。")
-            continue
 
         if recognized_text == "":
             continue
 
-        last_input_time = time.time()
-
-        if check_activation_phrase(recognized_text) and not session_active:
-            handle_activation()
-            session_active = True
-
-        elif session_active:  # ここでsession_activeを追加
-            response_text = get_openai_response(recognized_text)
+        response_text = get_openai_response(recognized_text)
             
-            if response_text:
-                print(response_text)
-                speech_recognizer.stop_continuous_recognition()
-                speech_synthesizer.speak_text(response_text)
-                speech_recognizer.start_continuous_recognition()
-                last_input_time = time.time()
-
+        if response_text:
+            print(response_text)
+            speech_recognizer.stop_continuous_recognition()
+            speech_synthesizer.speak_text(response_text)
+            speech_recognizer.start_continuous_recognition()
+            last_input_time = time.time()
 
         recognized_text = ""
 
@@ -120,7 +105,7 @@ if __name__ == "__main__":
     speech_key = os.getenv('AZURE_SPEECH_KEY')
     service_region, language = "japaneast", "ja-JP"
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region, speech_recognition_language=language)
-    audio_input_config = speechsdk.AudioConfig(device_name="{0.0.1.00000000}.{f4230723-0f8c-4396-aa65-59ebe2d673ad}")
+    audio_input_config = speechsdk.AudioConfig(use_default_microphone=True)
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input_config)
 
     audio_output_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
