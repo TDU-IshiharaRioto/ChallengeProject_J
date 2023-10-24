@@ -13,7 +13,6 @@ session_active = False
 messages_history = []
 last_input_time = time.time()
 recognized_text = ""
-pre_recognized = False
 
 # SIGINTハンドラ関数
 def signal_handler(sig, frame):
@@ -56,7 +55,8 @@ def handle_activation():
     global session_active, messages_history
     session_active = True
     messages_history = [{"role": "system", "content": "あなたはスマートミラーの中に搭載されたAIアシスタントです。"},{"role": "user", "content": "鏡よ、鏡"}]
-    speech_synthesizer.speak_text("はい、どうしましたか？")
+    print("はい、なんでしょう？")
+    speech_synthesizer.speak_text("はい、なんでしょう？")
 
 def get_openai_response(text):
     global messages_history
@@ -73,24 +73,38 @@ def get_openai_response(text):
         return ""
 
 def main_loop():
-    global recognized_text, pre_recognized, last_input_time, session_active
+    global recognized_text, last_input_time, session_active, messages_history
 
     while True:
         time.sleep(1)
 
-        if recognized_text == "":
+        if(session_active):
+            print(time.time() - last_input_time)
+        if session_active and (time.time() - last_input_time) > 20:
+            session_active = False
+            messages_history = []
+            print("会話を終了しました")
             continue
 
-        response_text = get_openai_response(recognized_text)
+        if recognized_text == "":
+            continue
             
-        if response_text:
-            print(response_text)
-            speech_recognizer.stop_continuous_recognition()
-            speech_synthesizer.speak_text(response_text)
-            speech_recognizer.start_continuous_recognition()
-            last_input_time = time.time()
+        if session_active:
+            response_text = get_openai_response(recognized_text)
+            if response_text:
+                print(response_text)
+                speech_recognizer.stop_continuous_recognition()
+                speech_synthesizer.speak_text(response_text)
+                speech_recognizer.start_continuous_recognition()
 
+        elif check_activation_phrase(recognized_text):
+            handle_activation()
+
+        last_input_time = time.time()
         recognized_text = ""
+
+
+        
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
@@ -112,7 +126,7 @@ if __name__ == "__main__":
     speech_config.speech_synthesis_voice_name = 'ja-JP-NanamiNeural'
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_output_config)
 
-    print("Say something...")
+    print("話しかけてください...")
 
     speech_recognizer.recognized.connect(recognized)
     speech_recognizer.start_continuous_recognition()
