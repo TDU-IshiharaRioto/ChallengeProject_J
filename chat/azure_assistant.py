@@ -103,9 +103,6 @@ def main_loop():
         last_input_time = time.time()
         recognized_text = ""
 
-
-        
-
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     setup_websocket_server()
