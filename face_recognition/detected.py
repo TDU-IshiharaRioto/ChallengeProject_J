@@ -6,6 +6,9 @@ import threading
 import signal
 import sys
 
+# Global Variables
+detected_printed = False
+
 # SIGINTハンドラ関数
 def signal_handler(sig, frame):
     print("Shutting down gracefully...")
@@ -17,16 +20,15 @@ signal.signal(signal.SIGINT, signal_handler)
 
 # WebSocketサーバーのコールバック関数
 def new_client(client, server):
-    global last_recognized_names  # グローバル変数として参照する
+    global detected_printed
+    detected_printed = False
     print("New client connected")
-    last_recognized_names = []  # リセット
 
 def client_left(client, server):
     print("Client disconnected")
 
 def message_received(client, server, message):
-    global last_recognized_names  # グローバル変数として参照する
-    server.send_message_to_all(",".join(last_recognized_names))
+    None
 
 
 
@@ -57,32 +59,33 @@ def main():
     minH = 0.1 * cam.get(4)
     prev_id = None
     last_detected_time = None
-    detected_printed, not_detected_printed = False, True
+    
 
     while True:
         ret, img = cam.read()
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = detect_faces(gray, face_cascade, minW, minH)
+        global detected_printed
 
         if len(faces) > 0:
             if not detected_printed:
                 message = '{"isDetected" : true}'
                 server.send_message_to_all(message)
                 print("検出")
-                detected_printed, not_detected_printed = True, False
+                detected_printed = True
             last_detected_time = time.time()
-        elif last_detected_time and time.time() - last_detected_time > 5 and not not_detected_printed:
+        elif last_detected_time and time.time() - last_detected_time > 5 and detected_printed:
             message = '{"isDetected" : false}'
             server.send_message_to_all(message)
             print("非検出")
-            detected_printed, not_detected_printed = False, True
+            detected_printed = False
             prev_id = None
 
         for (x, y, w, h) in faces:
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
             id, confidence = recognizer.predict(gray[y:y + h, x:x + w])
             
-            id_name = names[id] if confidence < 60 else "unknown"
+            id_name = names[id] if confidence < 50 else "unknown"
             confidence_text = "  {0}%".format(round(100 - confidence))
             
             if prev_id == None and id_name != "unknown":
