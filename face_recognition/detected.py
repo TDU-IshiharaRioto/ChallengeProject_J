@@ -74,7 +74,7 @@ def main():
                 print("検出")
                 detected_printed = True
             last_detected_time = time.time()
-        elif last_detected_time and time.time() - last_detected_time > 5 and detected_printed:
+        elif last_detected_time and time.time() - last_detected_time > 10 and detected_printed:
             message = '{"isDetected" : false}'
             server.send_message_to_all(message)
             print("非検出")
@@ -95,8 +95,8 @@ def main():
             cv2.putText(img, str(id_name), (x + 5, y - 5), font, 1, (255, 255, 255), 2)
             cv2.putText(img, confidence_text, (x + 5, y + h - 5), font, 1, (255, 255, 0), 1)
 
-        #cv2.imshow('camera', img)
-        time.sleep(0.5)
+        cv2.imshow('camera', img)
+        time.sleep(0.1)
         if cv2.waitKey(10) & 0xff == 27:
             break
 
