@@ -22,7 +22,7 @@ async def handler(websocket):
 
             print ("長さ：" + str(len(StatusData)))
             print ("路線数：" + str(len(StatusData) / 2))
-            result = {}
+            resultData = {}
 
             count = 0
             sended = ["" for i in range(int(len(StatusData) / 2))]
@@ -46,7 +46,7 @@ async def handler(websocket):
                         sended[sendedCount] = StatusData[i] + StatusData[i + 1]
                         sendedCount = sendedCount + 1
                         # ここでデータを追加
-                        result.update({name: result})
+                        resultData.update({name: result})
                         print("送信：" + str(sendedCount + 1) + "件目：" + name + "：" + result)
                 # 送信
                 await websocket.send(json.dump(result))
