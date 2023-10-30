@@ -4,6 +4,7 @@ import asyncio
 import websockets
 import JREastInformation as jre
 import TokyoMetro
+import json
 
 async def handler(websocket):
     try:    
@@ -21,7 +22,7 @@ async def handler(websocket):
 
             print ("長さ：" + str(len(StatusData)))
             print ("路線数：" + str(len(StatusData) / 2))
-            result = ""
+            result = {}
 
             count = 0
             sended = ["" for i in range(int(len(StatusData) / 2))]
@@ -44,10 +45,11 @@ async def handler(websocket):
                         
                         sended[sendedCount] = StatusData[i] + StatusData[i + 1]
                         sendedCount = sendedCount + 1
-                        await websocket.send(str(sendedCount))
-                        await websocket.send(name)
-                        await websocket.send(result)
-                        print("送信：" + str(sendedCount) + "件目：" + name + "：" + result)
+                        # ここでデータを追加
+                        result.update({name: result})
+                        print("送信：" + str(sendedCount + 1) + "件目：" + name + "：" + result)
+                # 送信
+                await websocket.send(json.dump(result))
             elif data == "LIST":
                 print ("メッセージ：路線一覧を送信します。")
                 for i in range(0, len(StatusData), 2):
@@ -64,7 +66,7 @@ async def handler(websocket):
                         sendedCount = sendedCount + 1
                         await websocket.send(str(sendedCount))
                         await websocket.send(StatusData[i])
-                        print("送信：" + str(sendedCount) + "件目：" + StatusData[i])
+                        print("送信：" + str(sendedCount) + 1 + "件目：" + StatusData[i])
             else:
                 print("メッセージ：指定された路線を送信します。" + data)
                 for i in range(0, len(StatusData), 2):
