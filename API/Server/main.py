@@ -49,7 +49,7 @@ async def handler(websocket):
                         resultData.update({name: result})
                         # print("送信：" + str(sendedCount + 1) + "件目：" + name + "：" + result)
                 # 送信
-                jsonData = json.dumps(resultData)
+                jsonData = json.dumps(resultData, ensure_ascii=False)
                 await websocket.send(jsonData)
                 print(jsonData)
             elif data == "LIST":
