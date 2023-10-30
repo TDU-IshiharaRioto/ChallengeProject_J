@@ -94,10 +94,9 @@ async def handler(websocket):
                             resultData.append({"name": name, "status": result})
                             #print("送信：" + str(sendedCount) + "件目：" + name + "：" + result)
                     if i == len(StatusData) - 2 and count == 0:
-                        await websocket.send("{}")
                         print("見つかりませんでした。")
                 jsonData = json.dumps(resultData, ensure_ascii=False, indent=4)
-                await websocket.send(resultData)
+                await websocket.send(jsonData)
             
     except KeyboardInterrupt:
         print("サーバーを終了します・・・")
