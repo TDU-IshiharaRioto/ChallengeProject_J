@@ -37,7 +37,7 @@ async def handler(websocket):
 
                     for l in range(sendedCount):
                         if sended[l] == StatusData[i] + StatusData[i + 1]:
-                            print("同一内容のためスキップ" + str(count) + "個目：" + name + "：" + result)
+                            #print("同一内容のためスキップ" + str(count) + "個目：" + name + "：" + result)
                             isSended = True
                             break
 
@@ -59,20 +59,22 @@ async def handler(websocket):
 
                     for l in range(sendedCount):
                         if sended[l] == StatusData[i]:
-                            print("同一内容のためスキップ：" + str(i + 1) + "個目：" + StatusData[i])
+                            #print("同一内容のためスキップ：" + str(i + 1) + "個目：" + StatusData[i])
                             isSended = True
                             break
                     
                     if isSended == False:
                         sended[sendedCount] = StatusData[i]
                         sendedCount = sendedCount + 1
-                        await websocket.send(str(sendedCount))
-                        await websocket.send(StatusData[i])
-                        print("送信：" + str(sendedCount) + 1 + "件目：" + StatusData[i])
+                        # ここでデータを追加
+                        resultData.append({"name": StatusData[i]})
+                        #print("送信：" + str(sendedCount) + 1 + "件目：" + StatusData[i])
+                jsonData = json.dumps(resultData, ensure_ascii=False, indent=4)
+                await websocket.send(jsonData)
             else:
                 print("メッセージ：指定された路線を送信します。" + data)
                 for i in range(0, len(StatusData), 2):
-                    print ("検索中・・・（" +  str(i) + "件目）" + StatusData[i])
+                    #print ("検索中・・・（" +  str(i) + "件目）" + StatusData[i])
                     if StatusData[i] == data:
                         count  = count + 1
                         result = StatusData[i + 1]
@@ -81,20 +83,21 @@ async def handler(websocket):
 
                         for l in range(sendedCount):
                             if sended[l] == StatusData[i] + StatusData[i + 1]:
-                                print("同一内容のためスキップ" + str(count) + "個目：" + name + "：" + result)
+                                #print("同一内容のためスキップ" + str(count) + "個目：" + name + "：" + result)
                                 isSended = True
                                 break
 
                         if isSended == False:
-                            await websocket.send(str(count))
-                            await websocket.send(name)
-                            await websocket.send(result)
                             sended[sendedCount] = StatusData[i] + StatusData[i + 1]
                             sendedCount = sendedCount + 1
-                            print("送信：" + str(sendedCount) + "件目：" + name + "：" + result)
+                            # ここでデータを追加
+                            resultData.append({"name": name, "status": result})
+                            #print("送信：" + str(sendedCount) + "件目：" + name + "：" + result)
                     if i == len(StatusData) - 2 and count == 0:
-                        await websocket.send("NOTFOUND")
+                        await websocket.send("{}")
                         print("見つかりませんでした。")
+                jsonData = json.dumps(resultData, ensure_ascii=False, indent=4)
+                await websocket.send(resultData)
             
     except KeyboardInterrupt:
         print("サーバーを終了します・・・")
