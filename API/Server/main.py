@@ -1,9 +1,10 @@
-# Websocketを利用して指定された会社・路線の運行情報を返す#
+# Websocketを利用して指定された会社・路線の運行情報を返す
 
 import asyncio
 import websockets
 import JREastInformation as jre
 import TokyoMetro
+import TobuRailway
 import json
 
 async def handler(websocket):
@@ -17,8 +18,9 @@ async def handler(websocket):
             # データ取得部分
             statusJREast = jre.getJREastInformation()
             statusTokyoMetro = TokyoMetro.getTokyoMetroInformation()
+            statusTobu = TobuRailway.getTobuRailwayInformation()
             # 結合
-            StatusData = statusJREast + statusTokyoMetro
+            StatusData = statusJREast + statusTokyoMetro + statusTobu
 
             print ("長さ：" + str(len(StatusData)))
             print ("路線数：" + str(len(StatusData) / 2))

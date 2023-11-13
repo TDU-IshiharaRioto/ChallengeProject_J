@@ -1,55 +1,40 @@
 import requests as req
-import json
-from bs4 import BeautifulSoup
+import xml.etree.ElementTree as ET
 
 def getTobuRailwayInformation():
-    url = []
-    url.append('https://www.tobu.co.jp/service_status/')
-    LineList = getTobuLineList()
-    contentNormal = '平常どおり運転しています。	'
+    url = "https://www.tobu.co.jp/file/trainop/trainop.xml"
+    contentNormal = '平常どおり運転しています。'
+
+    statusList = []
+    lineList = []
     
+    responce = req.get(url)
+    responce.encoding = responce.apparent_encoding
+    xmlData = responce.text
+    root = ET.fromstring(xmlData)
 
-    resultList = []
+    lineTag = 'line'
+    statusTag = 'description'
+    for line in root.iter(lineTag):
+        text = ET.tostring(line, encoding='utf-8').decode('utf-8')
+        text = text.replace('<line>', '').replace('</line>', '').replace('\n', '').replace(' ', '').replace('\u3000', ' ')
+        lineList.append(text)
 
-    for i in range(len(url)):
-        responce = req.get(url[i])
-        print (responce.text)
-        bs = BeautifulSoup(responce.text, "html.parser")
-        statusList = bs.find_all ("tbody")
+    i = 0
+    for status in root.iter(statusTag):
+        text = ET.tostring(status, encoding='utf-8').decode('utf-8')
+        text = text.replace('<description>', '').replace('</description>', '').replace('\n', '').replace(' ', '').replace('\u3000', ' ')
+        statusList.append(lineList[i])
+        if text == contentNormal:
+            statusList.append('平常運転')
+        else:
+            statusList.append(text)
+        i = i + 1
+    
+    return statusList
 
-        for l in range(len(statusList)):
-            print ('**********')
-            byte_string = statusList[l].getText().replace('\n', '').encode()
-            decoded_string = byte_string.decode('utf-8')
-            print(decoded_string)
-            print ('***********')
+
         
-        for i in range(len(statusList)):
-            print(statusList[i].getText().replace('\n', ''))
-            # resultList.append(LineList[i])
-            # resultList.append(statusList[i].getText().replace('\n', ''))
-
-    return resultList
-
-def getTobuLineList():
-    url = []
-    resultList = []
-    url.append('https://www.tobu.co.jp/service_status/')
-
-    for i in range(len(url)):
-        responce = req.get(url[i])
-        responce.encoding = responce.apparent_encoding
-
-        bs = BeautifulSoup(responce.text, "html.parser")
-
-        lineList = bs.find_all ("td")
-
-        for line in lineList:
-            data = line.getText().replace('\n', '')
-            if data != "" and data != " ":
-                resultList.append(data.replace('\u3000', ''))
-
-    return resultList
 
 if __name__ == "__main__":
-    print(getTobuRailwayInformation())
+    print (getTobuRailwayInformation())
