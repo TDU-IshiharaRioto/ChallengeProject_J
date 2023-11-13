@@ -79,10 +79,10 @@ async def handler(websocket):
                     jsonData = json.dumps(resultData, ensure_ascii=False, indent=4)
                     await websocket.send(jsonData)
                 else:
-                    print("メッセージ：指定された路線を送信します。" + data)
+                    print("メッセージ：指定された路線を送信します。" + requestData)
                     for i in range(0, len(StatusData), 2):
                         #print ("検索中・・・（" +  str(i) + "件目）" + StatusData[i])
-                        if StatusData[i] == data:
+                        if StatusData[i] == requestData:
                             count  = count + 1
                             result = StatusData[i + 1]
                             name = StatusData[i]
