@@ -55,9 +55,8 @@ async def handler(websocket):
                             # ここでデータを追加
                             resultData.append({"name": name, "status": result})
                             # print("送信：" + str(sendedCount + 1) + "件目：" + name + "：" + result)
-                    # 送信
+                    # 追加
                     jsonData = json.dumps(resultData, ensure_ascii=False, indent=4)
-                    await websocket.send(jsonData)
                     print(jsonData)
                 elif requestData == "LIST":
                     print ("メッセージ：路線一覧を送信します。")
@@ -77,7 +76,6 @@ async def handler(websocket):
                             resultData.append({"name": StatusData[i]})
                             #print("送信：" + str(sendedCount) + 1 + "件目：" + StatusData[i])
                     jsonData = json.dumps(resultData, ensure_ascii=False, indent=4)
-                    await websocket.send(jsonData)
                 else:
                     print("メッセージ：指定された路線を送信します。" + requestData)
                     for i in range(0, len(StatusData), 2):
@@ -103,7 +101,7 @@ async def handler(websocket):
                         if i == len(StatusData) - 2 and count == 0:
                             print("見つかりませんでした。")
                     jsonData = json.dumps(resultData, ensure_ascii=False, indent=4)
-                    await websocket.send(jsonData)
+                await websocket.send(jsonData)
             
     except KeyboardInterrupt:
         print("サーバーを終了します・・・")
