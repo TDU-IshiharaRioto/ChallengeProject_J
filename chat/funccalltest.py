@@ -1,3 +1,4 @@
+import json
 import os
 import openai
 
@@ -36,10 +37,55 @@ functions = [
 ]
 
 response = openai.ChatCompletion.create(
-    engine="chat",
+    engine="chat",#デプロイ名
     messages=messages,
     functions=functions,
     function_call="auto",
 )
+response_message = response["choices"][0]["message"]
+"""
+response_message = response["choices"][0]["message"]
 
-print(response['choices'][0]['message'])
+# Check if the model wants to call a function
+if response_message.get("function_call"):
+
+    # Call the function. The JSON response may not always be valid so make sure to handle errors
+    function_name = response_message["function_call"]["name"]
+
+    available_functions = {
+            "search_hotels": search_hotels,
+    }
+    function_to_call = available_functions[function_name] 
+
+    function_args = json.loads(response_message["function_call"]["arguments"])
+    function_response = function_to_call(**function_args)
+
+    # Add the assistant response and function response to the messages
+    messages.append( # adding assistant response to messages
+        {
+            "role": response_message["role"],
+            "function_call": {
+                "name": function_name,
+                "arguments": response_message["function_call"]["arguments"],
+            },
+            "content": None
+        }
+    )
+    messages.append( # adding function response to messages
+        {
+            "role": "function",
+            "name": function_name,
+            "content": function_response,
+        }
+    ) 
+
+    # Call the API again to get the final response from the model
+    second_response = openai.ChatCompletion.create(
+            messages=messages,
+            deployment_id="gpt-35-turbo-0613"
+            # optionally, you could provide functions in the second call as well
+        )
+    print(second_response["choices"][0]["message"])
+else:
+    print(response["choices"][0]["message"])
+"""
