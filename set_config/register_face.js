@@ -1,5 +1,4 @@
 const video = document.getElementById('video');
-const socket = new WebSocket("ws://localhost:5003");
 
 // getUserMedia()を使用してWebカメラを起動
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -23,6 +22,9 @@ document.body.appendChild(video);
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 
+// http通信関連
+const xhr = new XMLHttpRequest();
+
 // ビデオからフレームをキャプチャ
 async function captureFrame() {
     // キャンバスのサイズをビデオのサイズに合わせる
@@ -33,19 +35,37 @@ async function captureFrame() {
     data = [];
     for(let i = 0; i < 10; i++){
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL();
-
-        const encoded = btoa(dataURL);
-        console.log(encoded);
-        data.push(encoded);
+        dataURL = canvas.toDataURL();
+        data.push(dataURL);
+        // console.log(dataURL);
     
         await new Promise(resolve => setTimeout(resolve, 250));
     }
-    
-    data.forEach(elem => {
-    // 文字数が原因っぽい
-    // 分割して送ってみる？
-        socket.send("test");
-        console.log(typeof(elem));
-    });
+
+    xhr.open('POST', 'http://localhost:8080', true);
+    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+    xhr.onload = function() {
+        console.log('onload');
+        if (xhr.status >= 200 && xhr.status < 400) {
+            var response = xhr.responseText;
+            console.log(response);
+        } else {
+            console.error('リクエストに失敗しました。', xhr.status, xhr.statusText);
+        }
+    };
+
+    xhr.onerror = function() {
+        console.error('エラーが発生しました。');
+    };
+
+    xhr.ontimeout = function() {
+        console.error('timeout');
+    };
+
+    xhr.onabort = function() {
+        console.error('abort');
+    };
+
+    xhr.send(data);
 }
