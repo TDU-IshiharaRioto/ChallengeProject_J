@@ -6,6 +6,26 @@ from websocket_server import WebsocketServer
 import threading
 import signal
 import sys
+import json
+
+functions = [
+	{
+		"name":"teach_train_time_table",
+		"description": "電車の運行情報を教えてください",
+		"parameters":{
+			"type": "object",
+                "properties": {
+					"line name": {
+                        "type": "string",
+                        "description": "聞かれている路線"
+					}
+			},
+			"requaired":[]
+		}
+
+	},
+	
+]
 
 # Global Variables
 server = None
@@ -63,13 +83,26 @@ def get_openai_response(text):
     try:
         messages_history.append({"role": "user", "content": text})
         response = openai.ChatCompletion.create(
-            engine="gpt-35-turbo",
-            messages=messages_history
+            engine="chat",
+            messages=messages_history,
+            functions=functions
         )
+        s = str(response['choices'][0]['message'])
+        d = {}
+        d = json.loads(s)
+        print(s)
+        if('function_call' in d):
+            if(d['function_call']['name'] == 'teach_train_time_table'):
+                print('運行情報')
+        if('content' in d):
+            print("B")
+       
+            
         messages_history.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
         return response['choices'][0]['message']['content']
     except Exception as e:
         print(e)
+        #print(response['choices'][0]['message']['function_call'])
         return ""
 
 def main_loop():
@@ -77,7 +110,8 @@ def main_loop():
 
     while True:
         time.sleep(1)
-
+            
+        '''
         if(session_active):
             print(time.time() - last_input_time)
         if session_active and (time.time() - last_input_time) > 20:
@@ -85,10 +119,13 @@ def main_loop():
             messages_history = []
             print("会話を終了しました")
             continue
-
+        
         if recognized_text == "":
             continue
-            
+            '''
+        
+        recognized_text = input()
+        session_active = True   
         if session_active:
             response_text = get_openai_response(recognized_text)
             if response_text:
