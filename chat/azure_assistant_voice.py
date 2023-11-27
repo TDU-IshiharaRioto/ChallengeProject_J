@@ -131,7 +131,9 @@ def main_loop():
             if response_text:
                 print(response_text)
                 #speech_recognizer.stop_continuous_recognition()
+                server.send_message_to_all('{"type":"TEXT","text":"' + response_text + '"}')
                 speech_synthesizer.speak_text(response_text)
+                
                 #speech_recognizer.start_continuous_recognition()
 
         elif check_activation_phrase(recognized_text):
