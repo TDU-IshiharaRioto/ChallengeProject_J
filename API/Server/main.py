@@ -7,6 +7,7 @@ import TokyoMetro
 import TobuRailway
 import Keio
 import Toei
+import Tokyu
 import json
 
 async def handler(websocket):
@@ -23,8 +24,9 @@ async def handler(websocket):
             statusTobu = TobuRailway.getTobuRailwayInformation()
             statusToei = Toei.getToeiInfomation()
             statusKeio = Keio.getKeioInfomation()
+            statusTokyu = Tokyu.getTokyuInformation()
             # 結合
-            StatusData = statusJREast + statusTokyoMetro + statusTobu + statusToei + statusKeio
+            StatusData = statusJREast + statusTokyoMetro + statusTobu + statusToei + statusKeio + statusTokyu
 
             print ("長さ：" + str(len(StatusData)))
             print ("路線数：" + str(len(StatusData) / 2))
