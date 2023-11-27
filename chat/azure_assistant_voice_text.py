@@ -121,6 +121,8 @@ def main_loop():
             print("会話を終了しました")
             continue
         
+        session_active = True
+        recognized_text = input()
         if recognized_text == "":
             continue
 
@@ -128,10 +130,11 @@ def main_loop():
             response_text = get_openai_response(recognized_text)
             if response_text:
                 print(response_text)
-                speech_recognizer.stop_continuous_recognition()
+                #speech_recognizer.stop_continuous_recognition()
                 server.send_message_to_all('{"type":"TEXT","text":"' + response_text + '"}')
                 speech_synthesizer.speak_text(response_text)
-                speech_recognizer.start_continuous_recognition()
+                
+                #speech_recognizer.start_continuous_recognition()
 
         elif check_activation_phrase(recognized_text):
             handle_activation()
@@ -162,6 +165,6 @@ if __name__ == "__main__":
     print("話しかけてください...")
 
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.start_continuous_recognition()
+    #speech_recognizer.start_continuous_recognition()
 
     main_loop()
