@@ -5,6 +5,7 @@ import websockets
 import JREastInformation as jre
 import TokyoMetro
 import TobuRailway
+import Toei
 import json
 
 async def handler(websocket):
@@ -19,8 +20,9 @@ async def handler(websocket):
             statusJREast = jre.getJREastInformation()
             statusTokyoMetro = TokyoMetro.getTokyoMetroInformation()
             statusTobu = TobuRailway.getTobuRailwayInformation()
+            statusToei = Toei.getToeiInfomation()
             # 結合
-            StatusData = statusJREast + statusTokyoMetro + statusTobu
+            StatusData = statusJREast + statusTokyoMetro + statusTobu + statusToei
 
             print ("長さ：" + str(len(StatusData)))
             print ("路線数：" + str(len(StatusData) / 2))
