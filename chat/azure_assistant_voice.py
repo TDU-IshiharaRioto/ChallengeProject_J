@@ -120,10 +120,11 @@ def main_loop():
             messages_history = []
             print("会話を終了しました")
             continue
-        
+
         if recognized_text == "":
             continue
 
+        session_active = True
         if session_active:
             response_text = get_openai_response(recognized_text)
             if response_text:
