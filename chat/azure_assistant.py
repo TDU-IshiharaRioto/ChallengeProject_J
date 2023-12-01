@@ -94,6 +94,30 @@ def get_openai_response(text):
         if('function_call' in d):
             if(d['function_call']['name'] == 'teach_train_time_table'):
                 print('運行情報')
+                print('websocketに送信')
+                print('返答')
+                #messageは返答
+                message = {
+                            "name":"常磐線",
+                            "status":"20分の遅延",
+                            "details":"人身事故が起きています"
+                           }
+                #表示する
+                server.send_message_to_all(message)
+                print('返答の型を変更')
+                response_message = '以下の文章について説明してください。' + message['name']+'は'+message['status']+'です。'+ message['details']
+                print('返答をmessages_histryに追加')
+
+                messages_history.append({"role":"system","name":"train_info_response",'content':response_message})
+                print('もう一度chatgbt呼び出し')
+                print(messages_history)
+                second_response = openai.ChatCompletion.create(
+                    engine="chat",
+                    messages=messages_history,
+                )
+                print(second_response)
+                return second_response['choices'][0]['message']['content']
+                #print(message['name'],'は',message['status'],'です。')
         if('content' in d):
             print("B")
        
