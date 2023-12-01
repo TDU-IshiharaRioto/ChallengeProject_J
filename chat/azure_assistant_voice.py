@@ -33,6 +33,7 @@ session_active = False
 messages_history = []
 last_input_time = time.time()
 recognized_text = ""
+clients = {}
 
 # SIGINTハンドラ関数
 def signal_handler(sig, frame):
@@ -50,6 +51,11 @@ def client_left(client, server):
 
 def message_received(client, server, message):
     print("Client said: " + message)
+    data = json.loads(message)
+    if data['type'] == 'CONNECT':
+        clients[data['name']] = client
+    
+    
 
 def setup_websocket_server():
     global server
@@ -94,7 +100,7 @@ def get_openai_response(text):
         if('function_call' in d):
             if(d['function_call']['name'] == 'teach_train_time_table'):
                 print('運行情報')
-                server.send_message_to_all('{"type":"CALL","name":"train"}')
+                server.send_message(clients['train'],'{"type":"CALL","name":""}')
         if('content' in d):
             print("B")
        
@@ -130,7 +136,7 @@ def main_loop():
             if response_text:
                 print(response_text)
                 speech_recognizer.stop_continuous_recognition()
-                server.send_message_to_all('{"type":"TEXT","text":"' + response_text + '"}')
+                server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + response_text + '"}')
                 speech_synthesizer.speak_text(response_text)
                 speech_recognizer.start_continuous_recognition()
 
