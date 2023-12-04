@@ -24,6 +24,28 @@ functions = [
 		}
 
 	},
+    {
+		"name":"weather",
+		"description": "天気を教えてください",
+		"parameters":{
+			"type": "object",
+                "properties": {
+			},
+			"requaired":[]
+		}
+	},
+    {
+		"name":"timeTable",
+		"description": "時間割を教えてください",
+		"parameters":{
+			"type": "object",
+                "properties": {
+			},
+			"requaired":[]
+		}
+	},
+    
+    
 	
 ]
 
@@ -54,6 +76,13 @@ def message_received(client, server, message):
     data = json.loads(message)
     if data['type'] == 'CONNECT':
         clients[data['name']] = client
+
+    if data['type'] == 'RESPONSE':
+        if(client == clients['train']):
+            print(message)
+        if(client == clients['weather']):
+            print(message)
+
     
     
 
@@ -100,7 +129,36 @@ def get_openai_response(text):
         if('function_call' in d):
             if(d['function_call']['name'] == 'teach_train_time_table'):
                 print('運行情報')
-                server.send_message(clients['train'],'{"type":"CALL","name":""}')
+                server.send_message(clients['train'],'{"type":"CALL"}')
+                '''
+                print('websocketに送信')
+                print('返答')
+                #messageは返答
+                message = {
+                            "name":"常磐線",
+                            "status":"20分の遅延",
+                            "details":"人身事故が起きています"
+                           }
+                #表示する
+                server.send_message_to_all(message)
+                
+                print('返答の型を変更')
+                response_message = '以下の文章について説明してください。' + message['name']+'は'+message['status']+'です。'+ message['details']
+                print('返答をmessages_histryに追加')
+
+                messages_history.append({"role":"system","name":"train_info_response",'content':response_message})
+                print('もう一度chatgbt呼び出し')
+                print(messages_history)
+                second_response = openai.ChatCompletion.create(
+                    engine="gpt-35-turbo",
+                    messages=messages_history,
+                )
+                print(second_response)
+                return second_response['choices'][0]['message']['content']
+                #print(message['name'],'は',message['status'],'です。')
+                '''
+            if(d['function_call']['name'] == 'weather'):
+                server.send_message(clients['weather'],'{"type":"CALL"}')
         if('content' in d):
             print("B")
        
@@ -118,7 +176,7 @@ def main_loop():
     while True:
         time.sleep(1)
             
-        
+        '''
         if(session_active):
             print(time.time() - last_input_time)
         if session_active and (time.time() - last_input_time) > 20:
@@ -126,11 +184,13 @@ def main_loop():
             messages_history = []
             print("会話を終了しました")
             continue
-
+        
         if recognized_text == "":
             continue
-
-        session_active = True
+            '''
+        
+        recognized_text = input()
+        session_active = True   
         if session_active:
             response_text = get_openai_response(recognized_text)
             if response_text:
@@ -138,7 +198,7 @@ def main_loop():
                 speech_recognizer.stop_continuous_recognition()
                 server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + response_text + '"}')
                 speech_synthesizer.speak_text(response_text)
-                speech_recognizer.start_continuous_recognition()
+                #speech_recognizer.start_continuous_recognition()
 
         elif check_activation_phrase(recognized_text):
             handle_activation()
@@ -169,6 +229,6 @@ if __name__ == "__main__":
     print("話しかけてください...")
 
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.start_continuous_recognition()
+    #speech_recognizer.start_continuous_recognition()
 
     main_loop()
