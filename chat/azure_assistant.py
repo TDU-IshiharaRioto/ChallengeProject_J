@@ -33,6 +33,7 @@ session_active = False
 messages_history = []
 last_input_time = time.time()
 recognized_text = ""
+clients = {}
 
 # SIGINTハンドラ関数
 def signal_handler(sig, frame):
@@ -50,10 +51,15 @@ def client_left(client, server):
 
 def message_received(client, server, message):
     print("Client said: " + message)
+    data = json.loads(message)
+    if data['type'] == 'CONNECT':
+        clients[data['name']] = client
+    
+    
 
 def setup_websocket_server():
     global server
-    server = WebsocketServer(host="127.0.0.1", port=5002)
+    server = WebsocketServer(host="127.0.0.1", port=5005)
     server.set_fn_new_client(new_client)
     server.set_fn_client_left(client_left)
     server.set_fn_message_received(message_received)
@@ -104,6 +110,7 @@ def get_openai_response(text):
                            }
                 #表示する
                 server.send_message_to_all(message)
+                
                 print('返答の型を変更')
                 response_message = '以下の文章について説明してください。' + message['name']+'は'+message['status']+'です。'+ message['details']
                 print('返答をmessages_histryに追加')
@@ -155,6 +162,7 @@ def main_loop():
             if response_text:
                 print(response_text)
                 speech_recognizer.stop_continuous_recognition()
+                server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + response_text + '"}')
                 speech_synthesizer.speak_text(response_text)
                 speech_recognizer.start_continuous_recognition()
 
