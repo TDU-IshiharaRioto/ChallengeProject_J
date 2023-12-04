@@ -54,6 +54,9 @@ def message_received(client, server, message):
     data = json.loads(message)
     if data['type'] == 'CONNECT':
         clients[data['name']] = client
+    if(client == clients['train']):
+        print(message)
+
     
     
 
@@ -89,7 +92,7 @@ def get_openai_response(text):
     try:
         messages_history.append({"role": "user", "content": text})
         response = openai.ChatCompletion.create(
-            engine="chat",
+            engine="gpt-35-turbo",
             messages=messages_history,
             functions=functions
         )
@@ -100,6 +103,8 @@ def get_openai_response(text):
         if('function_call' in d):
             if(d['function_call']['name'] == 'teach_train_time_table'):
                 print('運行情報')
+                server.send_message(clients['train'],'{"type":"CALL"}')
+                '''
                 print('websocketに送信')
                 print('返答')
                 #messageは返答
@@ -119,12 +124,13 @@ def get_openai_response(text):
                 print('もう一度chatgbt呼び出し')
                 print(messages_history)
                 second_response = openai.ChatCompletion.create(
-                    engine="chat",
+                    engine="gpt-35-turbo",
                     messages=messages_history,
                 )
                 print(second_response)
                 return second_response['choices'][0]['message']['content']
                 #print(message['name'],'は',message['status'],'です。')
+                '''
         if('content' in d):
             print("B")
        
@@ -164,7 +170,7 @@ def main_loop():
                 speech_recognizer.stop_continuous_recognition()
                 server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + response_text + '"}')
                 speech_synthesizer.speak_text(response_text)
-                speech_recognizer.start_continuous_recognition()
+                #speech_recognizer.start_continuous_recognition()
 
         elif check_activation_phrase(recognized_text):
             handle_activation()
@@ -195,6 +201,6 @@ if __name__ == "__main__":
     print("話しかけてください...")
 
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.start_continuous_recognition()
+    #speech_recognizer.start_continuous_recognition()
 
     main_loop()
