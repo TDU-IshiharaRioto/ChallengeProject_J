@@ -87,7 +87,9 @@ def message_received(client, server, sned_message):
             s = str(response['choices'][0]['message']['content'])
             speak_and_dispaly(s)
         if(data['name'] == 'weather'):
-            messages_history.append({"role": "system", "content": "以下のデータを使って一つ前の質問に答えてください" + str(data['data'])})
+            weather_data = {"気温":data["data"]["temperature"],"天気":data["data"]["weatherType"]}
+            print(weather_data)
+            messages_history.append({"role": "system", "content": "以下のデータを使って一つ前の質問に答えてください" + str(weather_data)})
             response = openai.ChatCompletion.create(
                 engine="gpt-35-turbo",
                 messages=messages_history,
