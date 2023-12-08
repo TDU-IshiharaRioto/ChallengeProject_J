@@ -71,9 +71,9 @@ def new_client(client, server):
 def client_left(client, server):
     print("Client disconnected")
 
-def message_received(client, server, message):
-    print("Client said: " + message)
-    data = json.loads(message)
+def message_received(client, server, sned_message):
+    print("Client said: " + sned_message)
+    data = json.loads(sned_message)
     if data['type'] == 'CONNECT':
         clients[data['name']] = client
 
@@ -81,19 +81,15 @@ def message_received(client, server, message):
     print(data['name'])
     if data['type'] == 'RESPONSE':
         if(client == clients['train']):
-            print(message)
+            print(sned_message)
         if(data['name'] == 'weather'):
             messages_history.append({"role": "system", "content": "以下のデータを使って一つ前の質問に答えてください" + str(data['data'])})
             response = openai.ChatCompletion.create(
                 engine="gpt-35-turbo",
                 messages=messages_history,
             )
-            s = str(response['choices'][0]['message']['content'])
-            print(s)
-            speech_recognizer.stop_continuous_recognition()
-            server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + s + '"}')
-            speech_synthesizer.speak_text(s)
-            #speech_recognizer.start_continuous_recognition()
+
+            speak_and_dispaly(response['choices'][0]['message']['content'])
 
     
     
@@ -124,6 +120,13 @@ def handle_activation():
     messages_history = [{"role": "system", "content": "あなたはスマートミラーの中に搭載されたAIアシスタントです。"},{"role": "user", "content": "鏡よ、鏡"}]
     print("はい、なんでしょう？")
     speech_synthesizer.speak_text("はい、なんでしょう？")
+
+def speak_and_dispaly(text):
+    print(text)
+    speech_recognizer.stop_continuous_recognition()
+    server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + text + '"}')
+    speech_synthesizer.speak_text(text)
+    speech_recognizer.start_continuous_recognition()
 
 def get_openai_response(text):
     global messages_history
@@ -207,10 +210,7 @@ def main_loop():
             response_text = get_openai_response(recognized_text)
             if response_text:
                 print(response_text)
-                speech_recognizer.stop_continuous_recognition()
-                server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + response_text + '"}')
-                speech_synthesizer.speak_text(response_text)
-                #speech_recognizer.start_continuous_recognition()
+                speak_and_dispaly(response_text)
 
         elif check_activation_phrase(recognized_text):
             handle_activation()
