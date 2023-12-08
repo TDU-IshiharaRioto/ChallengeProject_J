@@ -54,8 +54,32 @@ def message_received(client, server, message):
     data = json.loads(message)
     if data['type'] == 'CONNECT':
         clients[data['name']] = client
-    if(client == clients['train']):
-        print(message)
+    if data['type'] == 'RESPONSE':
+        if(client == clients['train']):
+            """
+            print('train_info')
+            message_1 = json.loads(message)
+            json_message = json.loads(message_1['data'])
+            print(json_message)
+            response_message = ''
+            for key in json_message['data']:
+                response_message = response_message + key['name'] + 'は' +key['status']+ 'です。\n'
+            
+            print(response_message)
+            """
+            messages_history.append({"role": "system", "content": "以下のデータを使って一つ前の質問に答えてください" + str(data['data'])})
+            response = openai.ChatCompletion.create(
+                engine="chat",
+                messages=messages_history,
+            )
+            s = str(response['choices'][0]['message']['content'])
+            print(s)
+            speech_recognizer.stop_continuous_recognition()
+            server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + s + '"}')
+            speech_synthesizer.speak_text(s)
+
+
+
 
     
     
@@ -92,7 +116,7 @@ def get_openai_response(text):
     try:
         messages_history.append({"role": "user", "content": text})
         response = openai.ChatCompletion.create(
-            engine="gpt-35-turbo",
+            engine="chat",
             messages=messages_history,
             functions=functions
         )
@@ -103,7 +127,9 @@ def get_openai_response(text):
         if('function_call' in d):
             if(d['function_call']['name'] == 'teach_train_time_table'):
                 print('運行情報')
+                #websocketに送信
                 server.send_message(clients['train'],'{"type":"CALL"}')
+                
                 '''
                 print('websocketに送信')
                 print('返答')
