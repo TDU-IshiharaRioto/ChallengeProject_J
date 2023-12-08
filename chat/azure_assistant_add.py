@@ -77,18 +77,21 @@ def message_received(client, server, sned_message):
     if data['type'] == 'CONNECT':
         clients[data['name']] = client
 
-    print(data['type'])
-    print(data['name'])
     if data['type'] == 'RESPONSE':
-        if(client == clients['train']):
-            print(sned_message)
+        if(data['name'] == 'train'):
+            messages_history.append({"role": "system", "content": "以下のデータを使って一つ前の質問に答えてください" + str(data['data'])})
+            response = openai.ChatCompletion.create(
+                engine="gpt-35-turbo",
+                messages=messages_history,
+            )
+            s = str(response['choices'][0]['message']['content'])
+            speak_and_dispaly(s)
         if(data['name'] == 'weather'):
             messages_history.append({"role": "system", "content": "以下のデータを使って一つ前の質問に答えてください" + str(data['data'])})
             response = openai.ChatCompletion.create(
                 engine="gpt-35-turbo",
                 messages=messages_history,
             )
-
             speak_and_dispaly(response['choices'][0]['message']['content'])
 
     
