@@ -196,7 +196,7 @@ def main_loop():
     while True:
         time.sleep(1)
             
-        '''
+        
         if(session_active):
             print(time.time() - last_input_time)
         if session_active and (time.time() - last_input_time) > 20:
@@ -207,10 +207,11 @@ def main_loop():
         
         if recognized_text == "":
             continue
-            '''
-        
+            
+        '''
         recognized_text = input()
         session_active = True   
+        '''
         if session_active:
             response_text = get_openai_response(recognized_text)
             if response_text:
@@ -246,6 +247,6 @@ if __name__ == "__main__":
     print("話しかけてください...")
 
     speech_recognizer.recognized.connect(recognized)
-    #speech_recognizer.start_continuous_recognition()
+    speech_recognizer.start_continuous_recognition()
 
     main_loop()
