@@ -10,7 +10,7 @@ import json
 
 functions = [
 	{
-		"name":"teach_train_time_table",
+		"name":"trainFunction",
 		"description": "電車の運行情報を教えてください",
 		"parameters":{
 			"type": "object",
@@ -25,7 +25,7 @@ functions = [
 
 	},
     {
-		"name":"weather",
+		"name":"weatherFunction",
 		"description": "天気を教えてください",
 		"parameters":{
 			"type": "object",
@@ -35,13 +35,17 @@ functions = [
 		}
 	},
     {
-		"name":"timeTable",
+		"name":"timeTableFunction",
 		"description": "時間割を教えてください",
 		"parameters":{
 			"type": "object",
                 "properties": {
+                    "dayNumber": {
+                        "type": "string",
+                        "description": "聞かれている曜日を表す整数 (0:指定なし, 1:月曜日, 2:火曜日, 3:水曜日, 4:木曜日, 5:金曜日, 6:土曜日)"
+					}
 			},
-			"requaired":[]
+			"requaired":["dayNumber"]
 		}
 	},
     
@@ -78,23 +82,36 @@ def message_received(client, server, sned_message):
         clients[data['name']] = client
 
     if data['type'] == 'RESPONSE':
-        if(data['name'] == 'train'):
-            messages_history.append({"role": "system", "content": "以下のデータを使って一つ前の質問に答えてください" + str(data['data'])})
+        
+
+        if(client == clients['MMM-trainInfo']):
+            messages_history.append({"role": "user", "content": "以下のデータを使って一つ前の質問に答えてください" + str(data['data'])})
             response = openai.ChatCompletion.create(
                 engine="gpt-35-turbo",
                 messages=messages_history,
             )
             s = str(response['choices'][0]['message']['content'])
             speak_and_dispaly(s)
-        if(data['name'] == 'weather'):
-            weather_data = {"気温":data["data"]["temperature"],"天気":data["data"]["weatherType"]}
-            print(weather_data)
-            messages_history.append({"role": "system", "content": "以下のデータを使って一つ前の質問に答えてください" + str(weather_data)})
+        if(client == clients['weather']):
+            messages_history.append({"role": "user", "content": "以下のフォーマットとデータを使って一つ前の質問に答えてください。#フォーマット[現在の天気は~,気温は~です] #データ" + str(data['data'])})
             response = openai.ChatCompletion.create(
                 engine="gpt-35-turbo",
                 messages=messages_history,
             )
             speak_and_dispaly(response['choices'][0]['message']['content'])
+        if(client == clients['MMM-timeTable']):
+            print(json.loads(data['data']))
+            if(json.loads(data['data']) == []):
+                speak_and_dispaly("時間割はありません。")
+                return
+            messages_history.append({"role": "user", "content": "以下のデータを読み上げてください。授業がない場合はスキップしてください。" + str(data['data'])})
+            response = openai.ChatCompletion.create(
+                engine="gpt-35-turbo",
+                messages=messages_history,
+            )
+            speak_and_dispaly(response['choices'][0]['message']['content'])
+        global session_active
+        session_active = False
 
     
     
@@ -116,112 +133,85 @@ def recognized(evt):
     recognized_text = evt.result.text
 
 def check_activation_phrase(text):
-    activation_phrases = ["鏡よ", "鏡を"]
+    activation_phrases = ["鏡よ", "鏡を","スマートミラー"]
     return any(phrase in text for phrase in activation_phrases)
 
 def handle_activation():
     global session_active, messages_history
     session_active = True
     messages_history = [{"role": "system", "content": "あなたはスマートミラーの中に搭載されたAIアシスタントです。"},{"role": "user", "content": "鏡よ、鏡"}]
-    print("はい、なんでしょう？")
-    speech_synthesizer.speak_text("はい、なんでしょう？")
+    speak_and_dispaly("はい、なんでしょう？")
 
 def speak_and_dispaly(text):
     print(text)
     speech_recognizer.stop_continuous_recognition()
-    server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + text + '"}')
+
+    #clientsにMMM-chatがあるか確認
+    if('MMM-chat' in clients):
+        server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + text.replace('\n','') + '"}')
     speech_synthesizer.speak_text(text)
     speech_recognizer.start_continuous_recognition()
 
 def get_openai_response(text):
-    global messages_history
+    global messages_history,session_active
     try:
         messages_history.append({"role": "user", "content": text})
         response = openai.ChatCompletion.create(
             engine="gpt-35-turbo",
             messages=messages_history,
-            functions=functions
+            functions=functions,
+            function_call="auto"
         )
-        s = str(response['choices'][0]['message'])
-        d = {}
-        d = json.loads(s)
-        print(s)
-        if('function_call' in d):
-            if(d['function_call']['name'] == 'teach_train_time_table'):
+        response_data = json.loads(str(response['choices'][0]['message']))
+        print(response_data)
+        if('function_call' in response_data):
+            if(response_data['function_call']['name'] == 'trainFunction'):
                 print('運行情報')
-                server.send_message(clients['train'],'{"type":"CALL"}')
-                '''
-                print('websocketに送信')
-                print('返答')
-                #messageは返答
-                message = {
-                            "name":"常磐線",
-                            "status":"20分の遅延",
-                            "details":"人身事故が起きています"
-                           }
-                #表示する
-                server.send_message_to_all(message)
-                
-                print('返答の型を変更')
-                response_message = '以下の文章について説明してください。' + message['name']+'は'+message['status']+'です。'+ message['details']
-                print('返答をmessages_histryに追加')
-
-                messages_history.append({"role":"system","name":"train_info_response",'content':response_message})
-                print('もう一度chatgbt呼び出し')
-                print(messages_history)
-                second_response = openai.ChatCompletion.create(
-                    engine="gpt-35-turbo",
-                    messages=messages_history,
-                )
-                print(second_response)
-                return second_response['choices'][0]['message']['content']
-                #print(message['name'],'は',message['status'],'です。')
-                '''
-            if(d['function_call']['name'] == 'weather'):
+                server.send_message(clients['MMM-trainInfo'],'{"type":"CALL"}')
+            if(response_data['function_call']['name'] == 'weatherFunction'):
                 server.send_message(clients['weather'],'{"type":"CALL"}')
-        if('content' in d):
-            print("B")
-       
+            if(response_data['function_call']['name'] == 'timeTableFunction'):
+                arguments = json.loads(response_data['function_call']['arguments'])
+                dayNumber = arguments['dayNumber']
+                if(dayNumber == '0'):
+                    dayNumber = time.localtime().tm_wday + 1
+                    server.send_message(clients['MMM-timeTable'],'{"type":"CALL","dayNumber":' + str(dayNumber) +'}')
+                else:
+                    server.send_message(clients['MMM-timeTable'],'{"type":"CALL","dayNumber":' + str(arguments['dayNumber']) +'}')
             
-        messages_history.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
-        return response['choices'][0]['message']['content']
+            return ""
+        elif('content' in response_data):
+            
+            messages_history.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
+            return response['choices'][0]['message']['content']
+            
+        else:
+            return ""
     except Exception as e:
+        print("exceptions")
         print(e)
-        #print(response['choices'][0]['message']['function_call'])
-        return ""
+        return "すみません、よくわかりませんでした。"
 
 def main_loop():
     global recognized_text, last_input_time, session_active, messages_history
 
     while True:
         time.sleep(1)
-            
-        
-        if(session_active):
-            print(time.time() - last_input_time)
-        if session_active and (time.time() - last_input_time) > 20:
-            session_active = False
-            messages_history = []
-            print("会話を終了しました")
-            continue
-        
         if recognized_text == "":
             continue
             
-        '''
-        recognized_text = input()
-        session_active = True   
-        '''
         if session_active:
+        #if True:
+            messages_history = []
+            speech_recognizer.stop_continuous_recognition()
             response_text = get_openai_response(recognized_text)
             if response_text:
+                session_active = False
                 print(response_text)
                 speak_and_dispaly(response_text)
 
         elif check_activation_phrase(recognized_text):
             handle_activation()
-
-        last_input_time = time.time()
         recognized_text = ""
 
 if __name__ == "__main__":
