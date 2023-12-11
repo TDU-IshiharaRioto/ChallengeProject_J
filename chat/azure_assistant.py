@@ -169,7 +169,9 @@ def get_openai_response(text):
                 print('運行情報')
                 arguments = json.loads(response_data['function_call']['arguments'])
                 lineName = arguments['lineName']
-                server.send_message(clients['MMM-trainInfo'],'{"type":"CALL","lineName":' + str(lineName) + '}')
+                print(lineName)
+                #server.send_message(clients['MMM-trainInfo'],'{"type":"CALL"}')
+                server.send_message(clients['MMM-trainInfo'],'{"type":"CALL","lineName":"' + str(lineName) + '"}')
             if(response_data['function_call']['name'] == 'weatherFunction'):
                 server.send_message(clients['weather'],'{"type":"CALL"}')
             if(response_data['function_call']['name'] == 'timeTableFunction'):
@@ -199,9 +201,12 @@ def main_loop():
 
     while True:
         time.sleep(1)
+        speech_recognizer.stop_continuous_recognition()
+        recognized_text = input()
+        session_active = True
         if recognized_text == "":
             continue
-            
+        
         if session_active:
         #if True:
             messages_history = []
