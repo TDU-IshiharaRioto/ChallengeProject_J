@@ -15,12 +15,12 @@ functions = [
 		"parameters":{
 			"type": "object",
                 "properties": {
-					"line name": {
+					"lineName": {
                         "type": "string",
                         "description": "聞かれている路線"
 					}
 			},
-			"requaired":[]
+			"requaired":["lineName"]
 		}
 
 	},
@@ -167,7 +167,9 @@ def get_openai_response(text):
         if('function_call' in response_data):
             if(response_data['function_call']['name'] == 'trainFunction'):
                 print('運行情報')
-                server.send_message(clients['MMM-trainInfo'],'{"type":"CALL"}')
+                arguments = json.loads(response_data['function_call']['arguments'])
+                lineName = arguments['lineName']
+                server.send_message(clients['MMM-trainInfo'],'{"type":"CALL","lineName":' + str(lineName) + '}')
             if(response_data['function_call']['name'] == 'weatherFunction'):
                 server.send_message(clients['weather'],'{"type":"CALL"}')
             if(response_data['function_call']['name'] == 'timeTableFunction'):
