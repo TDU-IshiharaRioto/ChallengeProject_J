@@ -228,7 +228,7 @@ def main_loop():
         
         if session_active:
         #if True:
-            messages_history = []
+            messages_history = [{"role": "system", "content": "あなたは与えられた情報を使って質問に答えることができます。"}]
             speech_recognizer.stop_continuous_recognition()
             response_text = get_openai_response(recognized_text)
             if response_text:
