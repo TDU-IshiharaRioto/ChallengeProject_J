@@ -48,6 +48,16 @@ functions = [
 			"requaired":["dayNumber"]
 		}
 	},
+    {
+		"name":"dateTimeFunction",
+		"description": "日付もしくは時間を聞かれた際に答える",
+		"parameters":{
+			"type": "object",
+                "properties": {
+			},
+			"requaired":[]
+		}
+	},
     
     
 	
@@ -110,6 +120,14 @@ def message_received(client, server, sned_message):
                 messages=messages_history,
             )
             speak_and_dispaly(response['choices'][0]['message']['content'])
+        if(client == clients['clock']):
+            messages_history.append({"role": "user", "content": "以下のデータを使って一つ前の質問に日本語で答えてください" + str(data['data'])})
+            response = openai.ChatCompletion.create(
+                engine="gpt-35-turbo",
+                messages=messages_history,
+            )
+            s = str(response['choices'][0]['message']['content'])
+            speak_and_dispaly(s)
         global session_active
         session_active = False
 
@@ -182,7 +200,8 @@ def get_openai_response(text):
                     server.send_message(clients['MMM-timeTable'],'{"type":"CALL","dayNumber":' + str(dayNumber) +'}')
                 else:
                     server.send_message(clients['MMM-timeTable'],'{"type":"CALL","dayNumber":' + str(arguments['dayNumber']) +'}')
-            
+            if(response_data['function_call']['name'] == 'dateTimeFunction'):
+                server.send_message(clients['clock'],'{"type":"CALL"}')
             return ""
         elif('content' in response_data):
             
