@@ -125,45 +125,6 @@ def message_received(client, server, sned_message):
         global session_active
         session_active = False
 
-    
-    
-
-def setup_websocket_server():
-    global server
-    server = WebsocketServer(host="127.0.0.1", port=5005)
-    server.set_fn_new_client(new_client)
-    server.set_fn_client_left(client_left)
-    server.set_fn_message_received(message_received)
-    thread = threading.Thread(target=server.run_forever)
-    thread.start()
-
-def recognized(evt):
-    global recognized_text
-    if evt.result.text == "":
-        return
-    print('「{}」'.format(evt.result.text))
-    recognized_text = evt.result.text
-
-def check_activation_phrase(text):
-    activation_phrases = ["鏡よ", "鏡を","スマートミラー"]
-    return any(phrase in text for phrase in activation_phrases)
-
-def handle_activation():
-    global session_active, messages_history
-    session_active = True
-    messages_history = [{"role": "system", "content": "あなたは与えられた情報を使って質問に答えることができます。質問に答える際は質問に対する回答をなるべく簡潔に答えてください。"}]
-    speak_and_dispaly("はい、なんでしょう？")
-
-def speak_and_dispaly(text):
-    print(text)
-    speech_recognizer.stop_continuous_recognition()
-
-    #clientsにMMM-chatがあるか確認
-    if('MMM-chat' in clients):
-        server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + text.replace('\n','') + '"}')
-    speech_synthesizer.speak_text(text)
-    speech_recognizer.start_continuous_recognition()
-
 def get_openai_response(text):
     global messages_history
 
@@ -206,7 +167,44 @@ def get_openai_response(text):
 
     except Exception as e:
         print("Exception:", e)
-        return "Sorry, I didn't understand that."
+        return "すみません、よくわかりませんでした."
+
+def setup_websocket_server():
+    global server
+    server = WebsocketServer(host="127.0.0.1", port=5005)
+    server.set_fn_new_client(new_client)
+    server.set_fn_client_left(client_left)
+    server.set_fn_message_received(message_received)
+    thread = threading.Thread(target=server.run_forever)
+    thread.start()
+
+def recognized(evt):
+    global recognized_text
+    if evt.result.text == "":
+        return
+    print('「{}」'.format(evt.result.text))
+    recognized_text = evt.result.text
+
+def check_activation_phrase(text):
+    activation_phrases = ["鏡よ", "鏡を","スマートミラー"]
+    return any(phrase in text for phrase in activation_phrases)
+
+def handle_activation():
+    global session_active, messages_history
+    session_active = True
+    messages_history = [{"role": "system", "content": "あなたは与えられた情報を使って質問に答えることができます。質問に答える際は質問に対する回答をなるべく簡潔に答えてください。"}]
+    speak_and_dispaly("はい、なんでしょう？")
+
+def speak_and_dispaly(text):
+    print(text)
+    speech_recognizer.stop_continuous_recognition()
+
+    #clientsにMMM-chatがあるか確認
+    if('MMM-chat' in clients):
+        server.send_message(clients['MMM-chat'],'{"type":"TEXT","text":"' + text.replace('\n','') + '"}')
+    speech_synthesizer.speak_text(text)
+    speech_recognizer.start_continuous_recognition()
+
 
 def main_loop():
     global recognized_text, last_input_time, session_active, messages_history
