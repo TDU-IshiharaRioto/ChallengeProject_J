@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTTP通信サンプル</title>
+</head>
+<body>
+    <h1>HTTP通信サンプル</h1>
+    <button id="getRequest">getリクエストを送信</button><br>
+    get結果: <div id="response"></div>
+
+
+    <button id="postRequest">postリクエストを送信</button><br>
+    post結果: <div id="res_post"></div>
+
+    <script>
+        const data = JSON.stringify({
+            "name": "test",
+            "age": 20
+        });
+        const xhr = new XMLHttpRequest();
+
+        document.getElementById('getRequest').addEventListener('click', function() {
+            xhr.open('GET', 'http://localhost:8080', true);
+
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 400) {
+                    var response = xhr.responseText;
+                    document.getElementById('response').innerHTML = response;
+                } else {
+                    console.error('リクエストに失敗しました。');
+                }
+            };
+
+            xhr.onerror = function() {
+                console.error('ネットワークエラーが発生しました。');
+            };
+
+            xhr.send();
+        });
+
+        // CORSポリシー : https://javascript.keicode.com/newjs/what-is-cors.php
+        document.getElementById('postRequest').addEventListener('click', function() {
+            xhr.open('POST', 'http://localhost:8080', true);
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+            console.log('before send');
+            xhr.onload = function() {
+                console.log('func');
+                if (xhr.status >= 200 && xhr.status < 400) {
+                    var response = xhr.responseText;
+                    document.getElementById('res_post').innerHTML = response;
+                    console.log(response);
+                } else {
+                    console.error('リクエストに失敗しました。', xhr.status, xhr.statusText);
+                }
+            };
+
+            xhr.onerror = function() {
+                console.error('エラーが発生しました。');
+            };
+
+            xhr.ontimeout = function() {
+                console.error('timeout');
+            };
+
+            xhr.onabort = function() {
+                console.error('abort');
+            };
+
+            xhr.send(data);
+            console.log('after send');
+
+        });
+    </script>
+</body>
+</html>

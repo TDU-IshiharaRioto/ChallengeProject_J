@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>setGUI画面</title>
+    </head>
+    <body>
+        <h1>setGUI画面</h1>
+        <div>
+            MODULE
+            <select id = "module">
+                <option value=null>選択してください
+                <option value="clock" selected>clock</option>
+                <option value="weather">weather</option>
+            </select>
+            <br>
+        </div>
+
+        <div>
+            POSITION
+            <select id="position">
+                <option value=null>選択してください
+                <option value="top_bar" selected>top_bar</option>
+                <option value="top_left">top_left</option>
+                <option value="top_right">top_right</option>
+                <option value="top_center">top_center</option>
+            </select>
+            <br><br>
+
+        </div>
+
+        <div>
+            config
+            <textarea id = "config" rows="10" cols="60" >所定の書き方で</textarea>
+            <br><br><br>
+        </div>
+
+        <div>
+            <button onclick="writeModule()">preview</button>
+            <!-- <button onclick="sendResult()">送信</button> -->
+            <textarea id="output" rows="10" cols="60" readonly></textarea>
+        </div>
+        <script src = "set_GUI.js"></script>
+    </body>
+</html>
