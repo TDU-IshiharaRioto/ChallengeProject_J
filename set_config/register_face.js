@@ -1,4 +1,5 @@
 const video = document.getElementById('video');
+const user = document.getElementById('user');
 
 // getUserMedia()を使用してWebカメラを起動
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -7,6 +8,8 @@ navigator.mediaDevices.getUserMedia({ video: true })
         video.srcObject = stream;
         // ビデオを再生
         video.play();
+
+        alert('顔が正面に大きく映るようにして、Snap Phitoボタンを押してください。');
     })
     .catch(error => {
         console.error('Webカメラの起動に失敗しました。', error);
@@ -27,16 +30,24 @@ const xhr = new XMLHttpRequest();
 
 // ビデオからフレームをキャプチャ
 async function captureFrame() {
+    if(user.value == ''){
+        alert('名前を入力してください。');
+        return;
+    }
+
     // キャンバスのサイズをビデオのサイズに合わせる
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
     // ビデオからフレームをキャプチャしてキャンバスに描画
-    data = [];
+    ret = {};
+    ret['name'] = user.value;
+    ret['id'] = Math.floor(Math.random() * 1_000_000_000);
+    ret['images'] = [];
     for(let i = 0; i < 10; i++){
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         dataURL = canvas.toDataURL();
-        data.push(dataURL);
+        ret['images'].push(dataURL);
         // console.log(dataURL);
     
         await new Promise(resolve => setTimeout(resolve, 250));
@@ -67,5 +78,10 @@ async function captureFrame() {
         console.error('abort');
     };
 
-    xhr.send(data);
+    console.log(ret);
+    ret = JSON.stringify(ret);
+    // console.log(ret);
+    xhr.send(ret);
+
+    alert('登録が完了しました');
 }

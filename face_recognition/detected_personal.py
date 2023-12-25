@@ -16,7 +16,7 @@ def signal_handler(sig, frame):
     cv2.destroyAllWindows()
     sys.exit(0)
 
-signal.signal(signal.SIGINT, signal_handler)
+# signal.signal(signal.SIGINT, signal_handler)
 
 # WebSocketサーバーのコールバック関数
 def new_client(client, server):
@@ -28,12 +28,14 @@ def client_left(client, server):
     print("Client disconnected")
 
 def message_received(client, server, message):
+    print("Message received: {}".format(message))
     None
 
 
 
 def initialize_recognizer(trainer_path, cascade_path):
     recognizer = cv2.face.LBPHFaceRecognizer_create()
+    print(type(recognizer))
     recognizer.read(trainer_path)
     face_cascade = cv2.CascadeClassifier(cascade_path)
     return recognizer, face_cascade
@@ -46,10 +48,25 @@ def detect_faces(gray, face_cascade, minW, minH):
         minSize=(int(minW), int(minH)),
     )
 
+def get_names():
+    def get_file_path(folder_path):
+        import os
+        files = os.listdir(folder_path)
+        files_file = [('{}/{}'.format(folder_path,f)) for f in files if os.path.isfile(os.path.join(folder_path, f))]
+        return files_file
+
+    import json
+    names = {}
+    for file in get_file_path('./dataset'):
+        data = json.load(open(file))
+        names[data['id']] = data['name']
+    return names
+
 def main():
     recognizer, face_cascade = initialize_recognizer('trainer.yml', 'haarcascade_frontalface_default.xml')
     font = cv2.FONT_HERSHEY_SIMPLEX
-    names = ['None', 'nakatsu',"obama"]
+    names = get_names()
+    print(names)
 
     cam = cv2.VideoCapture(0)
     cam.set(3, 640)
@@ -67,6 +84,7 @@ def main():
         faces = detect_faces(gray, face_cascade, minW, minH)
         global detected_printed
 
+        # WebSocketにインターバルを空けてメッセージを送信
         if len(faces) > 0:
             if not detected_printed:
                 message = '{"isDetected" : true}'
@@ -85,6 +103,10 @@ def main():
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
             id, confidence = recognizer.predict(gray[y:y + h, x:x + w])
             
+            sys.stdout.write("\r")
+            sys.stdout.write(f"id: {id}, name: {names[id]}, confidence: {confidence}")
+            sys.stdout.flush()
+            
             id_name = names[id] if confidence < 50 else "unknown"
             confidence_text = "  {0}%".format(round(100 - confidence))
             
@@ -95,17 +117,18 @@ def main():
             cv2.putText(img, str(id_name), (x + 5, y - 5), font, 1, (255, 255, 255), 2)
             cv2.putText(img, confidence_text, (x + 5, y + h - 5), font, 1, (255, 255, 0), 1)
 
-        #cv2.imshow('camera', img)
-        time.sleep(0.5)
+        cv2.imshow('camera', img)
+        time.sleep(0.1)
         if cv2.waitKey(10) & 0xff == 27:
             break
 
     print("プログラムを終了します。")
     cam.release()
     cv2.destroyAllWindows()
+    exit(0)
 
 # WebSocketサーバーの初期設定
-server = WebsocketServer(host="127.0.0.1", port=5001)
+server = WebsocketServer(host='localhost', port=5001)
 server.set_fn_new_client(new_client)
 server.set_fn_client_left(client_left)
 server.set_fn_message_received(message_received)
