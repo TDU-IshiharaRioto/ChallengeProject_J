@@ -34,7 +34,7 @@ class FaceDetector:
                 print("検出")
                 self.detected_printed = True
             self.last_detected_time = time.time()
-        elif self.last_detected_time and time.time() - self.last_detected_time > 5 and self.detected_printed:
+        elif self.last_detected_time and time.time() - self.last_detected_time > 10 and self.detected_printed:
             message = '{"isDetected" : false}'
             server.send_message_to_all(message)
             print("非検出")
